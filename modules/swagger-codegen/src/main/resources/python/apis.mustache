@@ -1,0 +1,387 @@
+# coding: utf-8
+
+{{>partial_header}}
+
+from __future__ import absolute_import
+
+import re  # noqa: F401
+
+# python 2 and python 3 compatibility library
+import six
+
+
+class Api(object):
+    def __init__(self, api_client):
+        self.api_client = api_client
+{{#alloperations}}
+{{#operations}}
+{{#operation}}
+
+    def {{operationId}}(self, {{#sortParamsByRequiredFlag}}{{#allParams}}{{#required}}{{paramName}}, {{/required}}{{/allParams}}{{/sortParamsByRequiredFlag}}**kwargs):
+        """{{#summary}}{{.}}{{/summary}}{{^summary}}{{operationId}}{{/summary}}
+
+{{#notes}}
+        {{{notes}}}
+{{/notes}}
+{{#allParams}}
+        :param {{dataType}} {{paramName}}:{{#description}} {{{description}}}{{/description}}{{#required}} (required){{/required}}{{#optional}}(optional){{/optional}}
+{{/allParams}}
+        :return: {{#returnType}}{{returnType}}{{/returnType}}{{^returnType}}None{{/returnType}}
+        """
+{{#hasPathParams}}
+
+        path_params = {}
+{{#pathParams}}
+  {{#isListContainer}}
+    {{#items.isContainer}}
+        base_model.check_datatype("{{paramName}}", {{paramName}}, "{{datatype}}")
+    {{/items.isContainer}}
+    {{^items.isContainer}}
+        if not isinstance({{paramName}}, list):
+            raise Exception("The datatype of parameter({{paramName}}) is not list")
+        for v in {{paramName}}:
+      {{#items.isLong}}
+            if not isinstance(v, int if six.PY3 else long):
+                raise Exception("Not all items in parameter({{paramName}}) is type "
+                                "of long")
+      {{/items.isLong}}
+      {{^items.isLong}}
+            if not isinstance(v, {{items.datatype}}):
+                raise Exception("Not all items in parameter({{paramName}}) is type "
+                                "of {{items.datatype}}")
+      {{/items.isLong}}
+    {{/items.isContainer}}
+    {{^isCollectionFormatMulti}}{{! multi will not be used in path param}}
+        path_params["{{baseName}}"] = quote(get_cf('{{collectionFormat}}').join(
+            [str(v) for v in {{paramName}}]))
+    {{/isCollectionFormatMulti}}
+  {{/isListContainer}}
+  {{^isListContainer}}
+    {{#isLong}}
+        if not isinstance({{paramName}}, int if six.PY3 else long):
+            raise Exception("The datatype of parameter({{paramName}}) is not long")
+    {{/isLong}}
+    {{^isLong}}
+        if not isinstance({{paramName}}, {{dataType}}):
+            raise Exception("The datatype of parameter({{paramName}}) is not "
+                            "{{dataType}}")
+    {{/isLong}}
+        path_params["{{baseName}}"] = quote(str({{paramName}}))
+  {{/isListContainer}}
+
+{{/pathParams}}
+        url = '{{{path}}}'.format(**path_params)
+{{/hasPathParams}}
+{{#hasQueryParams}}
+
+        query_params = []
+{{#queryParams}}
+  {{#required}}
+    {{#isListContainer}}
+      {{#items.isContainer}}
+        base_model.check_datatype("{{paramName}}", {{paramName}}, "{{datatype}}")
+      {{/items.isContainer}}
+      {{^items.isContainer}}
+        if not isinstance({{paramName}}, list):
+            raise Exception("The datatype of parameter({{paramName}}) is not list")
+        for v in {{paramName}}:
+        {{#items.isLong}}
+            if not isinstance(v, int if six.PY3 else long):
+                raise Exception("Not all items in parameter({{paramName}}) is type "
+                                "of long")
+        {{/items.isLong}}
+        {{^items.isLong}}
+            if not isinstance(v, {{items.datatype}}):
+                raise Exception("Not all items in parameter({{paramName}}) is type "
+                                "of {{items.datatype}}")
+        {{/items.isLong}}
+      {{/items.isContainer}}
+      {{#isCollectionFormatMulti}}
+        for v in {{paramName}}:
+            query_params.append(("{{baseName}}", v))
+      {{/isCollectionFormatMulti}}
+      {{^isCollectionFormatMulti}}
+        query_params.append(
+            ("{{baseName}}",
+             get_cf('{{collectionFormat}}').join(
+                 [str(v) for v in {{paramName}}])))
+      {{/isCollectionFormatMulti}}
+    {{/isListContainer}}
+    {{^isListContainer}}
+      {{#isLong}}
+        if not isinstance({{paramName}}, int if six.PY3 else long):
+            raise Exception("The datatype of parameter({{paramName}}) is not long")
+      {{/isLong}}
+      {{^isLong}}
+        if not isinstance({{paramName}}, {{dataType}}):
+            raise Exception("The datatype of parameter({{paramName}}) is not "
+                            "{{dataType}}")
+      {{/isLong}}
+        query_params.append(("{{baseName}}", {{paramName}}))
+    {{/isListContainer}}
+  {{/required}}
+  {{^required}}
+        if '{{paramName}}' in kwargs:
+            param = kwargs['{{paramName}}']
+    {{#isListContainer}}
+      {{#items.isContainer}}
+            base_model.check_datatype("{{paramName}}", param, "{{datatype}}")
+      {{/items.isContainer}}
+      {{^items.isContainer}}
+            if not isinstance(param, list):
+                raise Exception("The datatype of parameter({{paramName}}) is not list")
+            for v in param:
+        {{#items.isLong}}
+                if not isinstance(v, int if six.PY3 else long):
+                    raise Exception("Not all items in parameter({{paramName}}) is type "
+                                    "of long")
+        {{/items.isLong}}
+        {{^items.isLong}}
+                if not isinstance(v, {{items.datatype}}):
+                    raise Exception("Not all items in parameter({{paramName}}) is type "
+                                    "of {{items.datatype}}")
+        {{/items.isLong}}
+      {{/items.isContainer}}
+      {{#isCollectionFormatMulti}}
+            for v in param:
+                query_params.append(("{{baseName}}", v))
+      {{/isCollectionFormatMulti}}
+      {{^isCollectionFormatMulti}}
+            query_params.append(
+                ("{{baseName}}",
+                get_cf('{{collectionFormat}}').join([str(v) for v in param])))
+      {{/isCollectionFormatMulti}}
+    {{/isListContainer}}
+    {{^isListContainer}}
+      {{#isLong}}
+            if not isinstance(param, int if six.PY3 else long):
+                raise Exception("The datatype of parameter({{paramName}}) is not long")
+      {{/isLong}}
+      {{^isLong}}
+            if not isinstance(param, {{dataType}}):
+                raise Exception("The datatype of parameter({{paramName}}) is not "
+                                "{{dataType}}")
+      {{/isLong}}
+            query_params.append(("{{baseName}}", param))
+    {{/isListContainer}}
+  {{/required}}
+  {{#hasMore}}
+
+  {{/hasMore}}
+{{/queryParams}}
+{{/hasQueryParams}}
+{{#hasFormParams}}
+
+        form_params = []
+        local_var_files = {}
+{{#formParams}}
+        if '{{paramName}}' in params:
+            {{#notFile}}form_params.append(('{{baseName}}', params['{{paramName}}'])){{/notFile}}{{#isFile}}local_var_files['{{baseName}}'] = params['{{paramName}}']{{/isFile}}{{#isListContainer}}  # noqa: E501
+            collection_formats['{{baseName}}'] = '{{collectionFormat}}'{{/isListContainer}}  # noqa: E501
+{{/formParams}}
+{{/hasFormParams}}
+{{#hasBodyParam}}
+{{#bodyParam}}
+
+  {{#bodyParam.vendorExtensions.x-reqbodyparammodel}}
+    {{#required}}
+        if not isinstance({{paramName}}, {{bodyParam.dataType}}):
+            raise Exception(
+                "The datatype of {{paramName}} is not {{bodyParam.dataType}}")
+        body_params = {{paramName}}.serialize()
+    {{/required}}
+    {{^required}}
+        body_params = None
+        if '{{paramName}}' in kwargs:
+            if not isinstance(kwargs['{{paramName}}'], {{bodyParam.dataType}}):
+                raise Exception(
+                    "The datatype of kwargs['{{paramName}}'] is not {{bodyParam.dataType}}")
+            body_params = kwargs['{{paramName}}'].serialize()
+    {{/required}}
+  {{/bodyParam.vendorExtensions.x-reqbodyparammodel}}
+  {{^bodyParam.vendorExtensions.x-reqbodyparammodel}}
+    {{#required}}
+        base_model.check_datatype("{{paramName}}", {{paramName}}, "{{bodyParam.dataType}}")
+        body_params = base_model.serialize({{paramName}})
+    {{/required}}
+    {{^required}}
+        body_params = None
+        if '{{paramName}}' in kwargs:
+            base_model.check_datatype("kwargs['{{paramName}}']", kwargs["{{paramName}}"], "{{bodyParam.dataType}}")
+            body_params = base_model.serialize(kwargs["{{paramName}}"])
+    {{/required}}
+  {{/bodyParam.vendorExtensions.x-reqbodyparammodel}}
+{{/bodyParam}}
+{{/hasBodyParam}}
+{{#hasHeaderParams}}
+
+        header_params = {}
+{{/hasHeaderParams}}
+{{^hasHeaderParams}}
+  {{#hasProduces}}
+
+        header_params = {}
+  {{/hasProduces}}
+  {{^hasProduces}}
+    {{#hasConsumes}}
+
+        header_params = {}
+    {{/hasConsumes}}
+  {{/hasProduces}}
+{{/hasHeaderParams}}
+{{#headerParams}}
+  {{#required}}
+    {{#isListContainer}}
+      {{#items.isContainer}}
+        base_model.check_datatype("{{paramName}}", {{paramName}}, "{{datatype}}")
+      {{/items.isContainer}}
+      {{^items.isContainer}}
+        if not isinstance({{paramName}}, list):
+            raise Exception("The datatype of parameter({{paramName}}) is not list")
+        for v in {{paramName}}:
+        {{#items.isLong}}
+            if not isinstance(v, int if six.PY3 else long):
+                raise Exception("Not all items in parameter({{paramName}}) is type "
+                                "of long")
+        {{/items.isLong}}
+        {{^items.isLong}}
+            if not isinstance(v, {{items.datatype}}):
+                raise Exception("Not all items in parameter({{paramName}}) is type "
+                                "of {{items.datatype}}")
+        {{/items.isLong}}
+      {{/items.isContainer}}
+      {{^isCollectionFormatMulti}}{{! multi will only be used in query param}}
+        header_params["{{baseName}}"] = get_cf('{{collectionFormat}}').join(
+            [str(v) for v in {{paramName}}])
+      {{/isCollectionFormatMulti}}
+    {{/isListContainer}}
+    {{^isListContainer}}
+      {{#isLong}}
+        if not isinstance({{paramName}}, int if six.PY3 else long):
+            raise Exception("The datatype of parameter({{paramName}}) is not long")
+      {{/isLong}}
+      {{^isLong}}
+        if not isinstance({{paramName}}, {{dataType}}):
+            raise Exception("The datatype of parameter({{paramName}}) is not "
+                            "{{dataType}}")
+      {{/isLong}}
+        header_params["{{baseName}}"] = {{paramName}}
+    {{/isListContainer}}
+  {{/required}}
+  {{^required}}
+        if '{{paramName}}' in kwargs:
+            param = kwargs['{{paramName}}']
+    {{#isListContainer}}
+      {{#items.isContainer}}
+            base_model.check_datatype("{{paramName}}", param, "{{datatype}}")
+      {{/items.isContainer}}
+      {{^items.isContainer}}
+            if not isinstance(param, list):
+                raise Exception("The datatype of parameter({{paramName}}) is not list")
+            for v in param:
+        {{#items.isLong}}
+                if not isinstance(v, int if six.PY3 else long):
+                    raise Exception("Not all items in parameter({{paramName}}) is type "
+                                    "of long")
+        {{/items.isLong}}
+        {{^items.isLong}}
+                if not isinstance(v, {{items.datatype}}):
+                    raise Exception("Not all items in parameter({{paramName}}) is type "
+                                    "of {{items.datatype}}")
+        {{/items.isLong}}
+      {{/items.isContainer}}
+      {{^isCollectionFormatMulti}}{{! multi will only be used in query param}}
+            header_params["{{baseName}}"] = get_cf('{{collectionFormat}}').join(
+                [str(v) for v in param])
+      {{/isCollectionFormatMulti}}
+    {{/isListContainer}}
+    {{^isListContainer}}
+      {{#isLong}}
+            if not isinstance(param, int if six.PY3 else long):
+                raise Exception("The datatype of parameter({{paramName}}) is not long")
+      {{/isLong}}
+      {{^isLong}}
+            if not isinstance(param, {{dataType}}):
+                raise Exception("The datatype of parameter({{paramName}}) is not "
+                                "{{dataType}}")
+      {{/isLong}}
+            header_params["{{baseName}}"] = param
+    {{/isListContainer}}
+  {{/required}}
+  {{#hasMore}}
+
+  {{/hasMore}}
+{{/headerParams}}
+{{#hasProduces}}
+  {{#hasHeaderParams}}
+
+  {{/hasHeaderParams}}
+        header_params['Accept'] = api_util.select_header_accept(
+            [{{#produces}}'{{{mediaType}}}'{{#hasMore}}, {{/hasMore}}{{/produces}}])
+{{/hasProduces}}
+{{#hasConsumes}}
+  {{#hasHeaderParams}}
+
+  {{/hasHeaderParams}}
+  {{^hasHeaderParams}}
+    {{#hasProduces}}
+
+    {{/hasProduces}}
+  {{/hasHeaderParams}}
+        header_params['Content-Type'] = api_util.select_header_content_type(
+            [{{#consumes}}'{{{mediaType}}}'{{#hasMore}}, {{/hasMore}}{{/consumes}}])
+{{/hasConsumes}}
+
+        return_code, return_data, header = self.api_client.call(
+            service_type, '{{httpMethod}}',{{#hasPathParams}} url,{{/hasPathParams}}
+{{^hasPathParams}}
+            '{{{path}}}',
+{{/hasPathParams}}
+{{#hasHeaderParams}}
+            headers=header_params,
+{{/hasHeaderParams}}
+{{^hasHeaderParams}}
+  {{#hasProduces}}
+            headers=header_params,
+  {{/hasProduces}}
+  {{^hasProduces}}
+    {{#hasConsumes}}
+            headers=header_params,
+    {{/hasConsumes}}
+  {{/hasProduces}}
+{{/hasHeaderParams}}
+{{#hasQueryParams}}
+            query_params=query_params,
+{{/hasQueryParams}}
+{{#hasBodyParam}}
+            body=body_params,
+{{/hasBodyParam}}
+            timeout=kwargs.get('_request_timeout', None),
+            _preload_content=kwargs.get('_preload_content', True))
+{{#vendorExtensions.x-respsuccesscodes}}
+        if return_code not in [{{vendorExtensions.x-respsuccesscodes}}]:
+             raise Exception("It is failed to run {{operationId}}, "
+                             "error code=%s, message=%s", str(return_code),
+                             return_data.get("message"))
+  {{#returnType}}
+    {{#vendorExtensions.x-respbodyparammodel}}
+        return {{returnType}}.deserialize(return_data)
+    {{/vendorExtensions.x-respbodyparammodel}}
+    {{^vendorExtensions.x-respbodyparammodel}}
+        return base_model.deserialize(return_data, "{{returnType}}")
+    {{/vendorExtensions.x-respbodyparammodel}}
+  {{/returnType}}
+{{/vendorExtensions.x-respsuccesscodes}}
+{{^vendorExtensions.x-respsuccesscodes}}
+  {{#returnType}}
+    {{#vendorExtensions.x-respbodyparammodel}}
+        return {{returnType}}.deserialize(return_data)
+    {{/vendorExtensions.x-respbodyparammodel}}
+    {{^vendorExtensions.x-respbodyparammodel}}
+        return base_model.deserialize(return_data, "{{returnType}}")
+    {{/vendorExtensions.x-respbodyparammodel}}
+  {{/returnType}}
+{{/vendorExtensions.x-respsuccesscodes}}
+{{/operation}}
+{{/operations}}
+{{/alloperations}}

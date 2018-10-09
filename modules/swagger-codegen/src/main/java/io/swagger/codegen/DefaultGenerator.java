@@ -409,10 +409,12 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
                         LOGGER.info("Skipped overwriting " + filename);
                         continue;
                     }
+                    /*
                     File written = processTemplateToFile(models, templateName, filename);
                     if (written != null) {
                         files.add(written);
                     }
+                    */
                 }
                 if (generateModelTests) {
                     generateModelTests(files, models, modelName);
@@ -496,6 +498,7 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
                     }
                 }
 
+                /*
                 for (String templateName : config.apiTemplateFiles().keySet()) {
                     String filename = config.apiFilename(templateName, tag);
                     if (!config.shouldOverwrite(filename) && new File(filename).exists()) {
@@ -508,6 +511,7 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
                         files.add(written);
                     }
                 }
+                */
 
                 if (generateApiTests) {
                     // to generate api test files
@@ -551,7 +555,6 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
             LOGGER.info("############ Operation info ############");
             Json.prettyPrint(allOperations);
         }
-
     }
 
     private void generateSupportingFiles(List<File> files, Map<String, Object> bundle) {
@@ -753,11 +756,174 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
         List<Object> allOperations = new ArrayList<Object>();
         generateApis(files, allOperations, allModels);
 
+        mergeModelApiInfo(allModels, allOperations);
+        files.add(writeModelFile(allModels));
+        files.add(writeApiFile(allOperations));
+
         // supporting files
         Map<String, Object> bundle = buildSupportFileBundle(allOperations, allModels);
         generateSupportingFiles(files, bundle);
         config.processSwagger(swagger);
         return files;
+    }
+
+
+    private void setVarReqResp(CodegenProperty var, boolean isReq, boolean isResp, Map<String, Map<String, Object>> modelMap) {
+        if (var.isContainer) {
+            setVarReqResp(var.items, isReq, isResp, modelMap);
+        } else {
+            if (var.complexType != null) {
+                if (modelMap.containsKey(var.complexType)) {
+                    Map<String, Object> model = modelMap.get(var.complexType);
+                    if (isResp) {
+                        model.put("isResp", true);
+                    }
+                    if (isReq) {
+                         model.put("isReq", true);
+                    }
+                    CodegenModel cm = (CodegenModel)model.get("model");
+                    for (CodegenProperty var1 : cm.vars) {
+                        setVarReqResp(var1, model.containsKey("isReq"), model.containsKey("isResp"), modelMap);
+                    }
+                }
+            }
+        }
+    }
+
+
+    private void mergeModelApiInfo(List<Object> allModels, List<Object> allOperations) {
+        LOGGER.info("start writeModelFile");
+        Map<String, Map<String, Object>> modelMap = new HashMap<String, Map<String, Object>>();
+        for (Object ms : allModels) {
+            Map<String, Object> model = (Map<String, Object>)ms;
+            if (!model.containsKey("model")) {
+                continue;
+            }
+            String classname = ((CodegenModel)model.get("model")).classname;
+            modelMap.put(classname, model);
+        }
+        for (Object allItems : allOperations) {
+            Map<String, Object> items = (Map<String, Object>)allItems;
+            if (!items.containsKey("operations")) {
+                continue;
+            }
+            Map<String, Object> operations = (Map<String, Object>)items.get("operations");
+            if (!operations.containsKey("operation")) {
+                continue;
+            }
+            List<CodegenOperation> operation = (List<CodegenOperation>)operations.get("operation");
+            for (CodegenOperation op : operation) {
+                String respType = op.returnBaseType;
+                String reqType = null;
+                if (op.bodyParam != null) {
+                    reqType = op.bodyParam.baseType;
+                    LOGGER.info("respType=" + respType + ", reqType=" + reqType + ", datatype=" + op.bodyParam.dataType);
+                }
+                LOGGER.info("respType=" + respType + ", reqType=" + reqType);
+
+                if (reqType != null && modelMap.containsKey(reqType)) {
+                    modelMap.get(reqType).put("isReq", true);
+
+                    if (reqType.equals(op.bodyParam.dataType)) {
+                        if (op.bodyParam.vendorExtensions == null) {
+                            op.bodyParam.vendorExtensions = new HashMap<String, Object>();
+                        }
+                        op.bodyParam.vendorExtensions.put("x-reqbodyparammodel", true);
+                    }
+                }
+
+                if (respType != null && modelMap.containsKey(respType)) {
+                    modelMap.get(respType).put("isResp", true);
+
+                    if (respType.equals(op.returnType)) {
+                        if (op.vendorExtensions == null) {
+                            op.vendorExtensions = new HashMap<String, Object>();
+                        }
+                        op.vendorExtensions.put("x-respbodyparammodel", true);
+                    }
+                }
+
+                if (!op.responses.isEmpty()) {
+                    List<String> successCode = new ArrayList<String>();
+                    for (CodegenResponse resp : op.responses) {
+                        if (resp.code.startsWith("2")) {
+                            successCode.add(resp.code);
+                        }
+                    }
+                    if (!successCode.isEmpty()) {
+                        op.vendorExtensions.put("x-respsuccesscodes", String.join(",", successCode));
+                    }
+                }
+            }
+        }
+        for (Object ms : allModels) {
+            Map<String, Object> model = (Map<String, Object>)ms;
+            if (!model.containsKey("model")) {
+                continue;
+            }
+            if (!model.containsKey("isResp") && !model.containsKey("isReq")) {
+                    continue;
+            }
+            CodegenModel cm = (CodegenModel)model.get("model");
+            for (CodegenProperty var : cm.vars) {
+                setVarReqResp(var, model.containsKey("isReq"), model.containsKey("isResp"), modelMap);
+            }
+        }
+    }
+
+
+    private File writeModelFile(List<Object> allModels) {
+        if (System.getProperty("debugModels") != null) {
+            LOGGER.info("############ New Model info ############");
+            Json.prettyPrint(allModels);
+        }
+
+        try {
+            for (String templateName : config.modelTemplateFiles().keySet()) {
+                String suffix = config.modelTemplateFiles().get(templateName);
+                String filename = config.modelFileFolder() + File.separator + config.toModelFilename("model") + suffix;
+                if (!config.shouldOverwrite(filename)) {
+                    LOGGER.info("Skipped overwriting " + filename);
+                } else {
+                    Map<String, Object> templateParam = new HashMap<String, Object>();
+                    templateParam.put("allmodels", allModels);
+                    File written = processTemplateToFile(templateParam, templateName, filename);
+                    if (written != null) {
+                        return written;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Could not generate model file", e);
+        }
+        return null;
+    }
+
+
+    private File writeApiFile(List<Object> allOperations) {
+        if (System.getProperty("debugOperations") != null) {
+            LOGGER.info("############ New Operation info ############");
+            Json.prettyPrint(allOperations);
+        }
+
+        try {
+            for (String templateName : config.apiTemplateFiles().keySet()) {
+                String filename = config.apiFilename(templateName, "");
+                if (!config.shouldOverwrite(filename) && new File(filename).exists()) {
+                    LOGGER.info("Skipped overwriting " + filename);
+                    continue;
+                }
+                Map<String, Object> templateParam = new HashMap<String, Object>();
+                templateParam.put("alloperations", allOperations);
+                File written = processTemplateToFile(templateParam, templateName, filename);
+                if (written != null) {
+                    return written;
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Could not generate api file", e);
+        }
+        return null;
     }
 
 

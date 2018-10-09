@@ -1,0 +1,280 @@
+# coding: utf-8
+import datetime
+import six
+{{#allmodels}}
+
+
+{{#model}}
+class {{classname}}({{#parent}}{{parent}}{{/parent}}{{^parent}}object{{/parent}}):
+    """{{classname}}
+
+    """
+
+    def __init__(self):
+        """
+{{#vars}}
+        :param {{name}}:{{#description}} {{description}}{{/description}}
+        :type {{name}}: {{{datatype}}}
+{{/vars}}
+        """
+
+{{#vars}}
+        self.{{name}} = None
+{{/vars}}
+{{#isReq}}
+
+    def serialize(self):
+  {{#vars}}
+    {{#required}}
+        if self.{{name}} == None:
+            raise Exception("The parameter({{name}}) is required")
+    {{/required}}
+    {{#isContainer}}
+      {{#isListContainer}}
+        {{#items.isContainer}}
+        base_model.check_datatype("{{name}}", self.{{name}}, "{{datatype}}")
+        {{/items.isContainer}}
+        {{^items.isContainer}}
+        if not isinstance(self.{{name}}, list):
+            raise Exception("The datatype of parameter({{name}}) is not list")
+        for v in self.{{name}}:
+          {{#items.complexType}}
+            if not isinstance(v, {{items.complexType}}):
+                raise Exception("Not all items in parameter({{name}}) is type "
+                                "of {{items.complexType}}")
+          {{/items.complexType}}
+          {{^items.complexType}}
+            {{#items.isDate}}
+            if not isinstance(v, datetime.date):
+                raise Exception("Not all items in parameter({{name}}) is type "
+                                "of datetime.date")
+            {{/items.isDate}}
+            {{^items.isDate}}
+              {{#items.isDateTime}}
+            if not isinstance(v, datetime.datetime):
+                raise Exception("Not all items in parameter({{name}}) is type "
+                                "of datetime.datetime")
+              {{/items.isDateTime}}
+              {{^items.isDateTime}}
+                {{#items.isLong}}
+            if not isinstance(v, int if six.PY3 else long):
+                raise Exception("Not all items in parameter({{name}}) is type "
+                                "of long")
+                {{/items.isLong}}
+                {{^items.isLong}}
+            if not isinstance(v, {{items.datatype}}):
+                raise Exception("Not all items in parameter({{name}}) is type "
+                                "of {{items.datatype}}")
+                {{/items.isLong}}
+              {{/items.isDateTime}}
+            {{/items.isDate}}
+          {{/items.complexType}}
+        {{/items.isContainer}}
+      {{/isListContainer}}
+      {{#isMapContainer}}
+        {{#items.isContainer}}
+        base_model.check_datatype("{{name}}", self.{{name}}, "{{datatype}}")
+        {{/items.isContainer}}
+        {{^items.isContainer}}
+        if isinstance(self.{{name}}, dict):
+            raise Exception("The datatype of parameter({{name}}) is not dict")
+        for v in self.{{name}}.values():
+          {{#items.complexType}}
+            if not isinstance(v, {{items.complexType}}):
+                raise Exception("Not all items in parameter({{name}}) is type "
+                                "of {{items.complexType}}")
+          {{/items.complexType}}
+          {{^items.complexType}}
+            {{#items.isDate}}
+            if not isinstance(v, datetime.date):
+                raise Exception("Not all items in parameter({{name}}) is type "
+                                "of datetime.date")
+            {{/items.isDate}}
+            {{^items.isDate}}
+              {{#items.isDateTime}}
+            if not isinstance(v, datetime.datetime):
+                raise Exception("Not all items in parameter({{name}}) is type "
+                                "of datetime.datetime")
+              {{/items.isDateTime}}
+              {{^items.isDateTime}}
+                {{#items.isLong}}
+            if not isinstance(v, int if six.PY3 else long):
+                raise Exception("Not all items in parameter({{name}}) is type "
+                                "of long")
+                {{/items.isLong}}
+                {{^items.isLong}}
+            if not isinstance(v, {{items.datatype}}):
+                raise Exception("Not all items in parameter({{name}}) is type "
+                                "of {{items.datatype}}")
+                {{/items.isLong}}
+              {{/items.isDateTime}}
+            {{/items.isDate}}
+          {{/items.complexType}}
+        {{/items.isContainer}}
+      {{/isMapContainer}}
+    {{/isContainer}}
+    {{^isContainer}}
+      {{#complexType}}
+        if not isinstance(self.{{name}}, {{complexType}}):
+            raise Exception("The datatype of parameter({{name}}) is not "
+                            "{{complexType}}")
+      {{/complexType}}
+      {{^complexType}}
+        {{#isDate}}
+        if not isinstance(self.{{name}}, datetime.date):
+            raise Exception("The datatype of parameter({{name}}) is not "
+                            "datetime.date")
+        {{/isDate}}
+        {{^isDate}}
+          {{#isDateTime}}
+        if not isinstance(self.{{name}}, datetime.datetime):
+            raise Exception("The datatype of parameter({{name}}) is not "
+                            "datetime.datetime")
+          {{/isDateTime}}
+          {{^isDateTime}}
+            {{#isLong}}
+        if not isinstance(self.{{name}}, int if six.PY3 else long):
+            raise Exception("The datatype of parameter({{name}}) is not long")
+            {{/isLong}}
+            {{^isLong}}
+        if not isinstance(self.{{name}}, {{datatype}}):
+            raise Exception("The datatype of parameter({{name}}) is not "
+                            "{{datatype}}")
+            {{/isLong}}
+          {{/isDateTime}}
+        {{/isDate}}
+      {{/complexType}}
+    {{/isContainer}}
+
+  {{/vars}}
+        obj = {
+  {{#vars}}
+            "{{name}}": self.{{name}}
+  {{/vars}}
+        }
+        return base_model.serialize(
+            {k: v for k, v in obj.items() if v != None})
+{{/isReq}}
+{{#isResp}}
+
+    def deserialize(self, data):
+        if isinstance(data, dict):
+            return None
+
+  {{#vars}}
+    {{#isContainer}}
+      {{#isListContainer}}
+        {{#items.isContainer}}
+        self.{{name}} = base_model.deserialize(
+            data.get("{{name}}"), "{{datatype}}")
+        {{/items.isContainer}}
+        {{^items.isContainer}}
+        if isinstance(data.get("{{name}}"), list):
+          {{#items.complexType}}
+            self.{{name}} = [
+                {{items.complexType}}().deserialize(v)
+                for v in data["{{name}}")]]
+          {{/items.complexType}}
+          {{^items.complexType}}
+            {{#items.isDate}}
+            self.{{name}} = [
+                base_model.deserialize_date(v)
+                for v in data["{{name}}"]]
+            {{/items.isDate}}
+            {{^items.isDate}}
+              {{#items.isDateTime}}
+            self.{{name}} = [
+                base_model.deserialize_datetime(v)
+                for v in data["{{name}}"]]
+              {{/items.isDateTime}}
+              {{^items.isDateTime}}
+                {{#items.isLong}}
+            self.{{name}} = [
+                base_model.deserialize_primitive(v, int if six.PY3 else long)
+                for v in data["{{name}}"]]
+                {{/items.isLong}}
+                {{^items.isLong}}
+            self.{{name}} = [
+                base_model.deserialize_primitive(v, {{items.datatype}})
+                for v in data["{{name}}"]]
+                {{/items.isLong}}
+              {{/items.isDateTime}}
+            {{/items.isDate}}
+          {{/items.complexType}}
+        {{/items.isContainer}}
+      {{/isListContainer}}
+      {{#isMapContainer}}
+        {{#items.isContainer}}
+        self.{{name}} = base_model.deserialize(
+            data.get("{{name}}"), "{{datatype}}")
+        {{/items.isContainer}}
+        {{^items.isContainer}}
+        if isinstance(data.get("{{name}}"), dict):
+          {{#items.complexType}}
+            self.{{name}} = {
+                k: {{items.complexType}}().deserialize(v)
+                for k, v in data["{{name}}")].items()}
+          {{/items.complexType}}
+          {{^items.complexType}}
+            {{#items.isDate}}
+            self.{{name}} = {
+                k: base_model.deserialize_date(v)
+                for k, v in data["{{name}}")].items()}
+            {{/items.isDate}}
+            {{^items.isDate}}
+              {{#items.isDateTime}}
+            self.{{name}} = {
+                k: base_model.deserialize_datetime(v)
+                for k, v in data["{{name}}")].items()}
+              {{/items.isDateTime}}
+              {{^items.isDateTime}}
+                {{#items.isLong}}
+            self.{{name}} = {
+                k: base_model.deserialize_primitive(v, int if six.PY3 else long)
+                for k, v in data["{{name}}")].items()}
+                {{/items.isLong}}
+                {{^items.isLong}}
+            self.{{name}} = {
+                k: base_model.deserialize_primitive(v, {{items.datatype}})
+                for k, v in data["{{name}}")].items()}
+                {{/items.isLong}}
+              {{/items.isDateTime}}
+            {{/items.isDate}}
+          {{/items.complexType}}
+        {{/items.isContainer}}
+      {{/isMapContainer}}
+    {{/isContainer}}
+    {{^isContainer}}
+      {{#complexType}}
+        self.{{name}} = {{complexType}}().deserialize(
+            data.get("{{name}}"))
+      {{/complexType}}
+      {{^complexType}}
+        {{#isDate}}
+        self.{{name}} = base_model.deserialize_date(
+            data.get("{{name}}"))
+        {{/isDate}}
+        {{^isDate}}
+          {{#isDateTime}}
+        self.{{name}} = base_model.deserialize_datetime(
+            data.get("{{name}}"))
+          {{/isDateTime}}
+          {{^isDateTime}}
+            {{#isLong}}
+        self.{{name}} = base_model.deserialize_primitive(
+            data.get("{{name}}"), int if six.PY3 else long)
+            {{/isLong}}
+            {{^isLong}}
+        self.{{name}} = base_model.deserialize_primitive(
+            data.get("{{name}}"), {{datatype}})
+            {{/isLong}}
+          {{/isDateTime}}
+        {{/isDate}}
+      {{/complexType}}
+    {{/isContainer}}
+
+  {{/vars}}
+        return self
+{{/isResp}}
+{{/model}}
+{{/allmodels}}
