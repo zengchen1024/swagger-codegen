@@ -1,13 +1,11 @@
 # coding: utf-8
 
-{{>partial_header}}
-
-from __future__ import absolute_import
-
-import re  # noqa: F401
-
-# python 2 and python 3 compatibility library
 import six
+from six.moves.urllib.parse import quote
+
+from huaweicloud.common.exception HuaweiCloudSDKException
+from huaweicloud.common import util
+from huaweicloud.{{serviceCategory}}.{{version}} import models
 
 
 class Api(object):
@@ -17,16 +15,22 @@ class Api(object):
 {{#operations}}
 {{#operation}}
 
-    def {{operationId}}(self, {{#sortParamsByRequiredFlag}}{{#allParams}}{{#required}}{{paramName}}, {{/required}}{{/allParams}}{{/sortParamsByRequiredFlag}}**kwargs):
+    def {{operationId}}(self, {{#allParams}}{{#required}}{{paramName}}, {{/required}}{{/allParams}}{{#allParams}}{{^required}}{{paramName}}=None, {{/required}}{{/allParams}}**kwargs):
         """{{#summary}}{{.}}{{/summary}}{{^summary}}{{operationId}}{{/summary}}
 
-{{#notes}}
-        {{{notes}}}
-{{/notes}}
 {{#allParams}}
-        :param {{dataType}} {{paramName}}:{{#description}} {{{description}}}{{/description}}{{#required}} (required){{/required}}{{#optional}}(optional){{/optional}}
+  {{#required}}
+        :param {{paramName}}:{{#description}} {{{description}}}{{/description}}
+        :type {{paramName}}: {{dataType}}
+  {{/required}}
 {{/allParams}}
-        :return: {{#returnType}}{{returnType}}{{/returnType}}{{^returnType}}None{{/returnType}}
+{{#allParams}}
+  {{^required}}
+        :param {{paramName}}:{{#description}} {{{description}}}{{/description}}
+        :type {{paramName}}: {{dataType}}
+  {{/required}}
+{{/allParams}}
+        :rtype: {{#returnType}}{{returnType}}{{/returnType}}{{^returnType}}None{{/returnType}}
         """
 {{#hasPathParams}}
 
@@ -34,37 +38,42 @@ class Api(object):
 {{#pathParams}}
   {{#isListContainer}}
     {{#items.isContainer}}
-        base_model.check_datatype("{{paramName}}", {{paramName}}, "{{datatype}}")
+        util.check_datatype("{{paramName}}", {{paramName}}, "{{datatype}}")
     {{/items.isContainer}}
     {{^items.isContainer}}
         if not isinstance({{paramName}}, list):
-            raise Exception("The datatype of parameter({{paramName}}) is not list")
+            raise HuaweiCloudSDKException(
+                message="The datatype of parameter({{paramName}}) is not list")
         for v in {{paramName}}:
       {{#items.isLong}}
             if not isinstance(v, int if six.PY3 else long):
-                raise Exception("Not all items in parameter({{paramName}}) is type "
-                                "of long")
+                raise HuaweiCloudSDKException(
+                    message="Not all items in parameter({{paramName}}) is "
+                            "type of long")
       {{/items.isLong}}
       {{^items.isLong}}
             if not isinstance(v, {{items.datatype}}):
-                raise Exception("Not all items in parameter({{paramName}}) is type "
-                                "of {{items.datatype}}")
+                raise HuaweiCloudSDKException(
+                    message="Not all items in parameter({{paramName}}) is "
+                            "type of {{items.datatype}}")
       {{/items.isLong}}
     {{/items.isContainer}}
     {{^isCollectionFormatMulti}}{{! multi will not be used in path param}}
-        path_params["{{baseName}}"] = quote(get_cf('{{collectionFormat}}').join(
-            [str(v) for v in {{paramName}}]))
+        path_params["{{baseName}}"] = quote(util.get_collect_format(
+            '{{collectionFormat}}').join(str(v) for v in {{paramName}}))
     {{/isCollectionFormatMulti}}
   {{/isListContainer}}
   {{^isListContainer}}
     {{#isLong}}
         if not isinstance({{paramName}}, int if six.PY3 else long):
-            raise Exception("The datatype of parameter({{paramName}}) is not long")
+            raise HuaweiCloudSDKException(
+                message="The datatype of parameter({{paramName}}) is not long")
     {{/isLong}}
     {{^isLong}}
         if not isinstance({{paramName}}, {{dataType}}):
-            raise Exception("The datatype of parameter({{paramName}}) is not "
-                            "{{dataType}}")
+            raise HuaweiCloudSDKException(
+                message="The datatype of parameter({{paramName}}) is not "
+                        "{{dataType}}")
     {{/isLong}}
         path_params["{{baseName}}"] = quote(str({{paramName}}))
   {{/isListContainer}}
@@ -79,21 +88,25 @@ class Api(object):
   {{#required}}
     {{#isListContainer}}
       {{#items.isContainer}}
-        base_model.check_datatype("{{paramName}}", {{paramName}}, "{{datatype}}")
+        util.check_datatype("{{paramName}}", {{paramName}}, "{{datatype}}")
       {{/items.isContainer}}
       {{^items.isContainer}}
         if not isinstance({{paramName}}, list):
-            raise Exception("The datatype of parameter({{paramName}}) is not list")
+            raise HuaweiCloudSDKException(
+                message="The datatype of parameter({{paramName}}) "
+                        "is not list")
         for v in {{paramName}}:
         {{#items.isLong}}
             if not isinstance(v, int if six.PY3 else long):
-                raise Exception("Not all items in parameter({{paramName}}) is type "
-                                "of long")
+                raise HuaweiCloudSDKException(
+                    message="Not all items in parameter({{paramName}}) "
+                            "is type of long")
         {{/items.isLong}}
         {{^items.isLong}}
             if not isinstance(v, {{items.datatype}}):
-                raise Exception("Not all items in parameter({{paramName}}) is type "
-                                "of {{items.datatype}}")
+                raise HuaweiCloudSDKException(
+                    message="Not all items in parameter({{paramName}}) "
+                            "is type of {{items.datatype}}")
         {{/items.isLong}}
       {{/items.isContainer}}
       {{#isCollectionFormatMulti}}
@@ -103,66 +116,76 @@ class Api(object):
       {{^isCollectionFormatMulti}}
         query_params.append(
             ("{{baseName}}",
-             get_cf('{{collectionFormat}}').join(
-                 [str(v) for v in {{paramName}}])))
+             util.get_collect_format('{{collectionFormat}}').join(
+                 str(v) for v in {{paramName}})))
       {{/isCollectionFormatMulti}}
     {{/isListContainer}}
     {{^isListContainer}}
       {{#isLong}}
         if not isinstance({{paramName}}, int if six.PY3 else long):
-            raise Exception("The datatype of parameter({{paramName}}) is not long")
+            raise HuaweiCloudSDKException(
+                message="The datatype of parameter({{paramName}}) "
+                        "is not long")
       {{/isLong}}
       {{^isLong}}
         if not isinstance({{paramName}}, {{dataType}}):
-            raise Exception("The datatype of parameter({{paramName}}) is not "
-                            "{{dataType}}")
+            raise HuaweiCloudSDKException(
+                message="The datatype of parameter({{paramName}}) "
+                        "is not {{dataType}}")
       {{/isLong}}
         query_params.append(("{{baseName}}", {{paramName}}))
     {{/isListContainer}}
   {{/required}}
   {{^required}}
-        if '{{paramName}}' in kwargs:
-            param = kwargs['{{paramName}}']
+        if {{paramName}} != None:
     {{#isListContainer}}
       {{#items.isContainer}}
-            base_model.check_datatype("{{paramName}}", param, "{{datatype}}")
+            util.check_datatype("{{paramName}}", {{paramName}}, "{{datatype}}")
       {{/items.isContainer}}
       {{^items.isContainer}}
-            if not isinstance(param, list):
-                raise Exception("The datatype of parameter({{paramName}}) is not list")
-            for v in param:
+            if not isinstance({{paramName}}, list):
+                raise HuaweiCloudSDKException(
+                    message="The datatype of parameter({{paramName}}) "
+                            "is not list")
+            for v in {{paramName}}:
         {{#items.isLong}}
                 if not isinstance(v, int if six.PY3 else long):
-                    raise Exception("Not all items in parameter({{paramName}}) is type "
-                                    "of long")
+                    raise HuaweiCloudSDKException(
+                        message="Not all items in parameter({{paramName}}) "
+                                "is type of long")
         {{/items.isLong}}
         {{^items.isLong}}
                 if not isinstance(v, {{items.datatype}}):
-                    raise Exception("Not all items in parameter({{paramName}}) is type "
-                                    "of {{items.datatype}}")
+                    raise HuaweiCloudSDKException(
+                        message="Not all items in parameter({{paramName}}) "
+                                "is type of {{items.datatype}}")
         {{/items.isLong}}
       {{/items.isContainer}}
       {{#isCollectionFormatMulti}}
-            for v in param:
+            for v in {{paramName}}:
                 query_params.append(("{{baseName}}", v))
       {{/isCollectionFormatMulti}}
       {{^isCollectionFormatMulti}}
             query_params.append(
                 ("{{baseName}}",
-                get_cf('{{collectionFormat}}').join([str(v) for v in param])))
+                 util.get_collect_format('{{collectionFormat}}').join(
+                     str(v) for v in {{paramName}})))
       {{/isCollectionFormatMulti}}
     {{/isListContainer}}
     {{^isListContainer}}
       {{#isLong}}
-            if not isinstance(param, int if six.PY3 else long):
-                raise Exception("The datatype of parameter({{paramName}}) is not long")
+            if not isinstance({{paramName}}, int if six.PY3 else long):
+                raise HuaweiCloudSDKException(
+                    message="The datatype of parameter({{paramName}}) "
+                            "is not long")
       {{/isLong}}
       {{^isLong}}
-            if not isinstance(param, {{dataType}}):
-                raise Exception("The datatype of parameter({{paramName}}) is not "
-                                "{{dataType}}")
+            if not isinstance({{paramName}}, {{dataType}}):
+                raise HuaweiCloudSDKException(
+                    message="The datatype of parameter({{paramName}}) "
+                            "is not {{dataType}}")
       {{/isLong}}
-            query_params.append(("{{baseName}}", param))
+            query_params.append(("{{baseName}}", {{paramName}}))
     {{/isListContainer}}
   {{/required}}
   {{#hasMore}}
@@ -186,29 +209,33 @@ class Api(object):
   {{#bodyParam.vendorExtensions.x-reqbodyparammodel}}
     {{#required}}
         if not isinstance({{paramName}}, {{bodyParam.dataType}}):
-            raise Exception(
-                "The datatype of {{paramName}} is not {{bodyParam.dataType}}")
+            raise HuaweiCloudSDKException(
+                message="The datatype of parameter({{paramName}}) "
+                        "is not {{bodyParam.dataType}}")
         body_params = {{paramName}}.serialize()
     {{/required}}
     {{^required}}
         body_params = None
-        if '{{paramName}}' in kwargs:
-            if not isinstance(kwargs['{{paramName}}'], {{bodyParam.dataType}}):
-                raise Exception(
-                    "The datatype of kwargs['{{paramName}}'] is not {{bodyParam.dataType}}")
-            body_params = kwargs['{{paramName}}'].serialize()
+        if {{paramName}} != None:
+            if not isinstance({{paramName}}, {{bodyParam.dataType}}):
+                raise HuaweiCloudSDKException(
+                    message="The datatype of parameter({{paramName}}) "
+                            "is not {{bodyParam.dataType}}")
+            body_params = {{paramName}}.serialize()
     {{/required}}
   {{/bodyParam.vendorExtensions.x-reqbodyparammodel}}
   {{^bodyParam.vendorExtensions.x-reqbodyparammodel}}
     {{#required}}
-        base_model.check_datatype("{{paramName}}", {{paramName}}, "{{bodyParam.dataType}}")
-        body_params = base_model.serialize({{paramName}})
+        util.check_datatype("{{paramName}}", {{paramName}},
+                            "{{bodyParam.dataType}}"{{#bodyParam.vendorExtensions.x-reqbodyparaminnermodel}}, models.{{bodyParam.baseType}}{{/bodyParam.vendorExtensions.x-reqbodyparaminnermodel}})
+        body_params = util.serialize({{paramName}})
     {{/required}}
     {{^required}}
         body_params = None
-        if '{{paramName}}' in kwargs:
-            base_model.check_datatype("kwargs['{{paramName}}']", kwargs["{{paramName}}"], "{{bodyParam.dataType}}")
-            body_params = base_model.serialize(kwargs["{{paramName}}"])
+        if {{paramName}} != None:
+            util.check_datatype("{{paramName}}", {{paramName}},
+                                "{{bodyParam.dataType}}"{{#bodyParam.vendorExtensions.x-reqbodyparaminnermodel}}, models.{{bodyParam.baseType}}{{/bodyParam.vendorExtensions.x-reqbodyparaminnermodel}})
+            body_params = util.serialize({{paramName}})
     {{/required}}
   {{/bodyParam.vendorExtensions.x-reqbodyparammodel}}
 {{/bodyParam}}
@@ -233,79 +260,92 @@ class Api(object):
   {{#required}}
     {{#isListContainer}}
       {{#items.isContainer}}
-        base_model.check_datatype("{{paramName}}", {{paramName}}, "{{datatype}}")
+        util.check_datatype("{{paramName}}", {{paramName}}, "{{datatype}}")
       {{/items.isContainer}}
       {{^items.isContainer}}
         if not isinstance({{paramName}}, list):
-            raise Exception("The datatype of parameter({{paramName}}) is not list")
+            raise HuaweiCloudSDKException(
+                message="The datatype of parameter({{paramName}}) "
+                        "is not list")
         for v in {{paramName}}:
         {{#items.isLong}}
             if not isinstance(v, int if six.PY3 else long):
-                raise Exception("Not all items in parameter({{paramName}}) is type "
-                                "of long")
+                raise HuaweiCloudSDKException(
+                    message="Not all items in parameter({{paramName}}) "
+                            "is type of long")
         {{/items.isLong}}
         {{^items.isLong}}
             if not isinstance(v, {{items.datatype}}):
-                raise Exception("Not all items in parameter({{paramName}}) is type "
-                                "of {{items.datatype}}")
+                raise HuaweiCloudSDKException(
+                    message="Not all items in parameter({{paramName}}) "
+                            "is type of {{items.datatype}}")
         {{/items.isLong}}
       {{/items.isContainer}}
       {{^isCollectionFormatMulti}}{{! multi will only be used in query param}}
-        header_params["{{baseName}}"] = get_cf('{{collectionFormat}}').join(
-            [str(v) for v in {{paramName}}])
+        header_params["{{baseName}}"] = util.get_collect_format('{{collectionFormat}}').join(
+            str(v) for v in {{paramName}})
       {{/isCollectionFormatMulti}}
     {{/isListContainer}}
     {{^isListContainer}}
       {{#isLong}}
         if not isinstance({{paramName}}, int if six.PY3 else long):
-            raise Exception("The datatype of parameter({{paramName}}) is not long")
+            raise HuaweiCloudSDKException(
+                message="The datatype of parameter({{paramName}}) "
+                        "is not long")
       {{/isLong}}
       {{^isLong}}
         if not isinstance({{paramName}}, {{dataType}}):
-            raise Exception("The datatype of parameter({{paramName}}) is not "
-                            "{{dataType}}")
+            raise HuaweiCloudSDKException(
+                message="The datatype of parameter({{paramName}}) "
+                        "is not {{dataType}}")
       {{/isLong}}
         header_params["{{baseName}}"] = {{paramName}}
     {{/isListContainer}}
   {{/required}}
   {{^required}}
-        if '{{paramName}}' in kwargs:
-            param = kwargs['{{paramName}}']
+        if {{paramName}} != None:
     {{#isListContainer}}
       {{#items.isContainer}}
-            base_model.check_datatype("{{paramName}}", param, "{{datatype}}")
+            util.check_datatype("{{paramName}}", {{paramName}}, "{{datatype}}")
       {{/items.isContainer}}
       {{^items.isContainer}}
-            if not isinstance(param, list):
-                raise Exception("The datatype of parameter({{paramName}}) is not list")
-            for v in param:
+            if not isinstance({{paramName}}, list):
+                raise HuaweiCloudSDKException(
+                    message="The datatype of parameter({{paramName}}) "
+                            "is not list")
+            for v in {{paramName}}:
         {{#items.isLong}}
                 if not isinstance(v, int if six.PY3 else long):
-                    raise Exception("Not all items in parameter({{paramName}}) is type "
-                                    "of long")
+                    raise HuaweiCloudSDKException(
+                        message="Not all items in parameter({{paramName}}) "
+                                "is type of long")
         {{/items.isLong}}
         {{^items.isLong}}
                 if not isinstance(v, {{items.datatype}}):
-                    raise Exception("Not all items in parameter({{paramName}}) is type "
-                                    "of {{items.datatype}}")
+                    raise HuaweiCloudSDKException(
+                        message="Not all items in parameter({{paramName}}) "
+                                "is type of {{items.datatype}}")
         {{/items.isLong}}
       {{/items.isContainer}}
-      {{^isCollectionFormatMulti}}{{! multi will only be used in query param}}
-            header_params["{{baseName}}"] = get_cf('{{collectionFormat}}').join(
-                [str(v) for v in param])
+      {{^isCollectionFormatMulti}}{{! multi will only be used in query {{paramName}}}}
+            header_params["{{baseName}}"] = util.get_collect_format('{{collectionFormat}}').join(
+                str(v) for v in {{paramName}})
       {{/isCollectionFormatMulti}}
     {{/isListContainer}}
     {{^isListContainer}}
       {{#isLong}}
-            if not isinstance(param, int if six.PY3 else long):
-                raise Exception("The datatype of parameter({{paramName}}) is not long")
+            if not isinstance({{paramName}}, int if six.PY3 else long):
+                raise HuaweiCloudSDKException(
+                    message="The datatype of parameter({{paramName}}) "
+                            "is not long")
       {{/isLong}}
       {{^isLong}}
-            if not isinstance(param, {{dataType}}):
-                raise Exception("The datatype of parameter({{paramName}}) is not "
-                                "{{dataType}}")
+            if not isinstance({{paramName}}, {{dataType}}):
+                raise HuaweiCloudSDKException(
+                    message="The datatype of parameter({{paramName}}) "
+                            "is not {{dataType}}")
       {{/isLong}}
-            header_params["{{baseName}}"] = param
+            header_params["{{baseName}}"] = {{paramName}}
     {{/isListContainer}}
   {{/required}}
   {{#hasMore}}
@@ -316,7 +356,7 @@ class Api(object):
   {{#hasHeaderParams}}
 
   {{/hasHeaderParams}}
-        header_params['Accept'] = api_util.select_header_accept(
+        header_params['Accept'] = util.select_header_accept(
             [{{#produces}}'{{{mediaType}}}'{{#hasMore}}, {{/hasMore}}{{/produces}}])
 {{/hasProduces}}
 {{#hasConsumes}}
@@ -328,12 +368,22 @@ class Api(object):
 
     {{/hasProduces}}
   {{/hasHeaderParams}}
-        header_params['Content-Type'] = api_util.select_header_content_type(
+        header_params['Content-Type'] = util.select_header_content_type(
             [{{#consumes}}'{{{mediaType}}}'{{#hasMore}}, {{/hasMore}}{{/consumes}}])
 {{/hasConsumes}}
 
-        return_code, return_data, header = self.api_client.call(
-            service_type, '{{httpMethod}}',{{#hasPathParams}} url,{{/hasPathParams}}
+{{#vendorExtensions.x-respsuccesscodes}}
+        return_code, return_data, _ = self.api_client.call(
+{{/vendorExtensions.x-respsuccesscodes}}
+{{^vendorExtensions.x-respsuccesscodes}}
+  {{#returnType}}
+        _, return_data, _ = self.api_client.call(
+  {{/returnType}}
+  {{^returnType}}
+        self.api_client.call(
+  {{/returnType}}
+{{/vendorExtensions.x-respsuccesscodes}}
+            '{{serviceType}}', '{{httpMethod}}',{{#hasPathParams}} url,{{/hasPathParams}}
 {{^hasPathParams}}
             '{{{path}}}',
 {{/hasPathParams}}
@@ -359,26 +409,50 @@ class Api(object):
             timeout=kwargs.get('_request_timeout', None),
             _preload_content=kwargs.get('_preload_content', True))
 {{#vendorExtensions.x-respsuccesscodes}}
-        if return_code not in [{{vendorExtensions.x-respsuccesscodes}}]:
-             raise Exception("It is failed to run {{operationId}}, "
-                             "error code=%s, message=%s", str(return_code),
-                             return_data.get("message"))
+
   {{#returnType}}
+        if return_data != None:
+            return_data = json.loads(return_data)
+        else:
+            return_data = {}
+        if return_code not in [{{vendorExtensions.x-respsuccesscodes}}]:
+            raise HuaweiCloudSDKException(
+                return_code,
+                "Run {{operationId}} failed, "
+                "message=%s" % return_data.get("message"))
     {{#vendorExtensions.x-respbodyparammodel}}
         return {{returnType}}.deserialize(return_data)
     {{/vendorExtensions.x-respbodyparammodel}}
     {{^vendorExtensions.x-respbodyparammodel}}
-        return base_model.deserialize(return_data, "{{returnType}}")
+        return util.deserialize(
+            return_data, "{{returnType}}"{{#vendorExtensions.x-respbodyparaminnermodel}}, models.{{returnBaseType}}{{/vendorExtensions.x-respbodyparaminnermodel}})
     {{/vendorExtensions.x-respbodyparammodel}}
+  {{/returnType}}
+  {{^returnType}}
+        if return_code not in [{{vendorExtensions.x-respsuccesscodes}}]:
+            if return_data != None:
+                return_data = json.loads(return_data)
+            else:
+                return_data = {}
+            raise HuaweiCloudSDKException(
+                return_code,
+                "Run {{operationId}} failed, "
+                "message=%s" % return_data.get("message"))
   {{/returnType}}
 {{/vendorExtensions.x-respsuccesscodes}}
 {{^vendorExtensions.x-respsuccesscodes}}
   {{#returnType}}
+
+        if return_data != None:
+            return_data = json.loads(return_data)
+        else:
+            return_data = {}
     {{#vendorExtensions.x-respbodyparammodel}}
         return {{returnType}}.deserialize(return_data)
     {{/vendorExtensions.x-respbodyparammodel}}
     {{^vendorExtensions.x-respbodyparammodel}}
-        return base_model.deserialize(return_data, "{{returnType}}")
+        return util.deserialize(
+            return_data, "{{returnType}}"{{#vendorExtensions.x-respbodyparaminnermodel}}, models.{{returnBaseType}}{{/vendorExtensions.x-respbodyparaminnermodel}})
     {{/vendorExtensions.x-respbodyparammodel}}
   {{/returnType}}
 {{/vendorExtensions.x-respsuccesscodes}}
