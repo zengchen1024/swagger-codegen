@@ -862,7 +862,7 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
                         }
                     }
                     if (!successCode.isEmpty()) {
-                        op.vendorExtensions.put("x-respsuccesscodes", String.join(",", successCode));
+                        op.vendorExtensions.put("x-respsuccesscodes", String.join(", ", successCode));
                     }
                 }
             }
@@ -897,6 +897,9 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
 
         try {
             version = version.replaceAll("[.]", "_");
+            if (!version.startsWith("v")) {
+                version = "v" + version;
+            }
             for (String templateName : config.modelTemplateFiles().keySet()) {
                 String suffix = config.modelTemplateFiles().get(templateName);
                 String filename = config.apiFileFolder() + File.separator + serviceCategory + File.separator + version + File.separator + "models" + suffix;
@@ -926,6 +929,9 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
 
         try {
             version = version.replaceAll("[.]", "_");
+            if (!version.startsWith("v")) {
+                version = "v" + version;
+            }
             for (String templateName : config.apiTemplateFiles().keySet()) {
                 String suffix = config.apiTemplateFiles().get(templateName);
                 String filename = config.apiFileFolder() + File.separator + serviceCategory + File.separator + version + File.separator + "api" + suffix;

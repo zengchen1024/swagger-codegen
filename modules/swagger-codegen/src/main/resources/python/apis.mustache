@@ -1,9 +1,10 @@
 # coding: utf-8
 
+import json
 import six
 from six.moves.urllib.parse import quote
 
-from huaweicloud.common.exception HuaweiCloudSDKException
+from huaweicloud.common.exception import HuaweiCloudSDKException
 from huaweicloud.common import util
 from huaweicloud.{{serviceCategory}}.{{version}} import models
 
@@ -137,7 +138,7 @@ class Api(object):
     {{/isListContainer}}
   {{/required}}
   {{^required}}
-        if {{paramName}} != None:
+        if {{paramName}} is not None:
     {{#isListContainer}}
       {{#items.isContainer}}
             util.check_datatype("{{paramName}}", {{paramName}}, "{{datatype}}")
@@ -208,7 +209,7 @@ class Api(object):
 
   {{#bodyParam.vendorExtensions.x-reqbodyparammodel}}
     {{#required}}
-        if not isinstance({{paramName}}, {{bodyParam.dataType}}):
+        if not isinstance({{paramName}}, models.{{bodyParam.dataType}}):
             raise HuaweiCloudSDKException(
                 message="The datatype of parameter({{paramName}}) "
                         "is not {{bodyParam.dataType}}")
@@ -216,8 +217,8 @@ class Api(object):
     {{/required}}
     {{^required}}
         body_params = None
-        if {{paramName}} != None:
-            if not isinstance({{paramName}}, {{bodyParam.dataType}}):
+        if {{paramName}} is not None:
+            if not isinstance({{paramName}}, models.{{bodyParam.dataType}}):
                 raise HuaweiCloudSDKException(
                     message="The datatype of parameter({{paramName}}) "
                             "is not {{bodyParam.dataType}}")
@@ -232,7 +233,7 @@ class Api(object):
     {{/required}}
     {{^required}}
         body_params = None
-        if {{paramName}} != None:
+        if {{paramName}} is not None:
             util.check_datatype("{{paramName}}", {{paramName}},
                                 "{{bodyParam.dataType}}"{{#bodyParam.vendorExtensions.x-reqbodyparaminnermodel}}, models.{{bodyParam.baseType}}{{/bodyParam.vendorExtensions.x-reqbodyparaminnermodel}})
             body_params = util.serialize({{paramName}})
@@ -303,7 +304,7 @@ class Api(object):
     {{/isListContainer}}
   {{/required}}
   {{^required}}
-        if {{paramName}} != None:
+        if {{paramName}} is not None:
     {{#isListContainer}}
       {{#items.isContainer}}
             util.check_datatype("{{paramName}}", {{paramName}}, "{{datatype}}")
@@ -373,14 +374,14 @@ class Api(object):
 {{/hasConsumes}}
 
 {{#vendorExtensions.x-respsuccesscodes}}
-        return_code, return_data, _ = self.api_client.call(
+        return_code, return_data, _ = self.api_client.handle_raw_request(
 {{/vendorExtensions.x-respsuccesscodes}}
 {{^vendorExtensions.x-respsuccesscodes}}
   {{#returnType}}
-        _, return_data, _ = self.api_client.call(
+        _, return_data, _ = self.api_client.handle_raw_request(
   {{/returnType}}
   {{^returnType}}
-        self.api_client.call(
+        self.api_client.handle_raw_request(
   {{/returnType}}
 {{/vendorExtensions.x-respsuccesscodes}}
             '{{serviceType}}', '{{httpMethod}}',{{#hasPathParams}} url,{{/hasPathParams}}
@@ -411,7 +412,7 @@ class Api(object):
 {{#vendorExtensions.x-respsuccesscodes}}
 
   {{#returnType}}
-        if return_data != None:
+        if return_data is not None:
             return_data = json.loads(return_data)
         else:
             return_data = {}
@@ -421,7 +422,7 @@ class Api(object):
                 "Run {{operationId}} failed, "
                 "message=%s" % return_data.get("message"))
     {{#vendorExtensions.x-respbodyparammodel}}
-        return {{returnType}}.deserialize(return_data)
+        return models.{{returnType}}().deserialize(return_data)
     {{/vendorExtensions.x-respbodyparammodel}}
     {{^vendorExtensions.x-respbodyparammodel}}
         return util.deserialize(
@@ -430,7 +431,7 @@ class Api(object):
   {{/returnType}}
   {{^returnType}}
         if return_code not in [{{vendorExtensions.x-respsuccesscodes}}]:
-            if return_data != None:
+            if return_data is not None:
                 return_data = json.loads(return_data)
             else:
                 return_data = {}
@@ -443,12 +444,12 @@ class Api(object):
 {{^vendorExtensions.x-respsuccesscodes}}
   {{#returnType}}
 
-        if return_data != None:
+        if return_data is not None:
             return_data = json.loads(return_data)
         else:
             return_data = {}
     {{#vendorExtensions.x-respbodyparammodel}}
-        return {{returnType}}.deserialize(return_data)
+        return models.{{returnType}}().deserialize(return_data)
     {{/vendorExtensions.x-respbodyparammodel}}
     {{^vendorExtensions.x-respbodyparammodel}}
         return util.deserialize(
