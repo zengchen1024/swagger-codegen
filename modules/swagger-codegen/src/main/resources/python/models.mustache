@@ -1,0 +1,451 @@
+# coding: utf-8
+import datetime
+import six
+
+from huaweicloud.common.basic_model import BasicModel
+from huaweicloud.common.exception import HuaweiCloudSDKException
+from huaweicloud.common import util
+{{#allmodels}}
+
+
+{{#model}}
+class {{classname}}({{#parent}}{{parent}}{{/parent}}{{^parent}}BasicModel{{/parent}}):
+    """{{classname}}
+
+    """
+
+    def __init__(self):
+        """
+{{#vars}}
+        :param {{name}}:{{#description}} {{description}}{{/description}}
+        :type {{name}}: {{{datatype}}}
+{{/vars}}
+        """
+
+{{#vars}}
+        self.{{name}} = None
+{{/vars}}
+{{#isReq}}
+
+    def serialize(self):
+  {{#vars}}
+    {{#required}}
+        if self.{{name}} is None:
+            raise HuaweiCloudSDKException(
+                message="The parameter({{name}}) is required")
+      {{#isContainer}}
+        {{#isListContainer}}
+          {{#items.isContainer}}
+        util.check_datatype(
+            "{{name}}", self.{{name}}, "{{datatype}}"{{#vendorExtensions.x-innerclass}}, {{vendorExtensions.x-innerclass}}{{/vendorExtensions.x-innerclass}})
+          {{/items.isContainer}}
+          {{^items.isContainer}}
+        if not isinstance(self.{{name}}, list):
+            raise HuaweiCloudSDKException(
+                message="The datatype of parameter({{name}}) "
+                        "is not list")
+        for v in self.{{name}}:
+            {{#items.complexType}}
+            if not isinstance(v, {{items.complexType}}):
+                raise HuaweiCloudSDKException(
+                    message="Not all items in parameter({{name}}) "
+                            "is type of {{items.complexType}}")
+            {{/items.complexType}}
+            {{^items.complexType}}
+              {{#items.isDate}}
+            if not isinstance(v, datetime.date):
+                raise HuaweiCloudSDKException(
+                    message="Not all items in parameter({{name}}) "
+                            "is type of datetime.date")
+              {{/items.isDate}}
+              {{^items.isDate}}
+                {{#items.isDateTime}}
+            if not isinstance(v, datetime.datetime):
+                raise HuaweiCloudSDKException(
+                    message="Not all items in parameter({{name}}) "
+                            "is type of datetime.datetime")
+                {{/items.isDateTime}}
+                {{^items.isDateTime}}
+                  {{#items.isLong}}
+            if not isinstance(v, int if six.PY3 else long):
+                raise HuaweiCloudSDKException(
+                    message="Not all items in parameter({{name}}) "
+                            "is type of long")
+                  {{/items.isLong}}
+                  {{^items.isLong}}
+            if not isinstance(v, {{items.datatype}}):
+                raise HuaweiCloudSDKException(
+                    message="Not all items in parameter({{name}}) "
+                            "is type of {{items.datatype}}")
+                  {{/items.isLong}}
+                {{/items.isDateTime}}
+              {{/items.isDate}}
+            {{/items.complexType}}
+          {{/items.isContainer}}
+        {{/isListContainer}}
+        {{#isMapContainer}}
+          {{#items.isContainer}}
+        util.check_datatype(
+            "{{name}}", self.{{name}}, "{{datatype}}"{{#vendorExtensions.x-innerclass}}, {{vendorExtensions.x-innerclass}}{{/vendorExtensions.x-innerclass}})
+          {{/items.isContainer}}
+          {{^items.isContainer}}
+        if isinstance(self.{{name}}, dict):
+            raise HuaweiCloudSDKException(
+                message="The datatype of parameter({{name}}) "
+                        "is not dict")
+        for v in self.{{name}}.values():
+            {{#items.complexType}}
+            if not isinstance(v, {{items.complexType}}):
+                raise HuaweiCloudSDKException(
+                    message="Not all items in parameter({{name}}) "
+                            "is type of {{items.complexType}}")
+            {{/items.complexType}}
+            {{^items.complexType}}
+              {{#items.isDate}}
+            if not isinstance(v, datetime.date):
+                raise HuaweiCloudSDKException(
+                    message="Not all items in parameter({{name}}) "
+                            "is type of datetime.date")
+              {{/items.isDate}}
+              {{^items.isDate}}
+                {{#items.isDateTime}}
+            if not isinstance(v, datetime.datetime):
+                raise HuaweiCloudSDKException(
+                    message="Not all items in parameter({{name}}) "
+                            "is type of datetime.datetime")
+                {{/items.isDateTime}}
+                {{^items.isDateTime}}
+                  {{#items.isLong}}
+            if not isinstance(v, int if six.PY3 else long):
+                raise HuaweiCloudSDKException(
+                    message="Not all items in parameter({{name}}) "
+                            "is type of long")
+                  {{/items.isLong}}
+                  {{^items.isLong}}
+            if not isinstance(v, {{items.datatype}}):
+                raise HuaweiCloudSDKException(
+                    message="Not all items in parameter({{name}}) "
+                            "is type of {{items.datatype}}")
+                  {{/items.isLong}}
+                {{/items.isDateTime}}
+              {{/items.isDate}}
+            {{/items.complexType}}
+          {{/items.isContainer}}
+        {{/isMapContainer}}
+      {{/isContainer}}
+      {{^isContainer}}
+        {{#complexType}}
+        if not isinstance(self.{{name}}, {{complexType}}):
+            raise HuaweiCloudSDKException(
+                message="The datatype of parameter({{name}}) "
+                        "is not {{complexType}}")
+        {{/complexType}}
+        {{^complexType}}
+          {{#isDate}}
+        if not isinstance(self.{{name}}, datetime.date):
+            raise HuaweiCloudSDKException(
+                message="The datatype of parameter({{name}}) "
+                        "is not datetime.date")
+          {{/isDate}}
+          {{^isDate}}
+            {{#isDateTime}}
+        if not isinstance(self.{{name}}, datetime.datetime):
+            raise HuaweiCloudSDKException(
+                message="The datatype of parameter({{name}}) "
+                        "is not datetime.datetime")
+            {{/isDateTime}}
+            {{^isDateTime}}
+              {{#isLong}}
+        if not isinstance(self.{{name}}, int if six.PY3 else long):
+            raise HuaweiCloudSDKException(
+                message="The datatype of parameter({{name}}) "
+                        "is not long")
+              {{/isLong}}
+              {{^isLong}}
+        if not isinstance(self.{{name}}, {{datatype}}):
+            raise HuaweiCloudSDKException(
+                message="The datatype of parameter({{name}}) "
+                        "is not {{datatype}}")
+              {{/isLong}}
+            {{/isDateTime}}
+          {{/isDate}}
+        {{/complexType}}
+      {{/isContainer}}
+
+    {{/required}}
+  {{/vars}}
+  {{#vars}}
+    {{^required}}
+        if self.{{name}} is not None:
+      {{#isContainer}}
+        {{#isListContainer}}
+          {{#items.isContainer}}
+            util.check_datatype(
+                "{{name}}", self.{{name}}, "{{datatype}}"{{#vendorExtensions.x-innerclass}}, {{vendorExtensions.x-innerclass}}{{/vendorExtensions.x-innerclass}})
+          {{/items.isContainer}}
+          {{^items.isContainer}}
+            if not isinstance(self.{{name}}, list):
+                raise HuaweiCloudSDKException(
+                    message="The datatype of parameter({{name}}) "
+                            "is not list")
+            for v in self.{{name}}:
+            {{#items.complexType}}
+                if not isinstance(v, {{items.complexType}}):
+                    raise HuaweiCloudSDKException(
+                        message="Not all items in parameter({{name}}) "
+                                "is type of {{items.complexType}}")
+            {{/items.complexType}}
+            {{^items.complexType}}
+              {{#items.isDate}}
+                if not isinstance(v, datetime.date):
+                    raise HuaweiCloudSDKException(
+                        message="Not all items in parameter({{name}}) "
+                                "is type of datetime.date")
+              {{/items.isDate}}
+              {{^items.isDate}}
+                {{#items.isDateTime}}
+                if not isinstance(v, datetime.datetime):
+                    raise HuaweiCloudSDKException(
+                        message="Not all items in parameter({{name}}) "
+                                "is type of datetime.datetime")
+                {{/items.isDateTime}}
+                {{^items.isDateTime}}
+                  {{#items.isLong}}
+                if not isinstance(v, int if six.PY3 else long):
+                    raise HuaweiCloudSDKException(
+                        message="Not all items in parameter({{name}}) "
+                                "is type of long")
+                  {{/items.isLong}}
+                  {{^items.isLong}}
+                if not isinstance(v, {{items.datatype}}):
+                    raise HuaweiCloudSDKException(
+                        message="Not all items in parameter({{name}}) "
+                                "is type of {{items.datatype}}")
+                  {{/items.isLong}}
+                {{/items.isDateTime}}
+              {{/items.isDate}}
+            {{/items.complexType}}
+          {{/items.isContainer}}
+        {{/isListContainer}}
+        {{#isMapContainer}}
+          {{#items.isContainer}}
+            util.check_datatype(
+                "{{name}}", self.{{name}}, "{{datatype}}"{{#vendorExtensions.x-innerclass}}, {{vendorExtensions.x-innerclass}}{{/vendorExtensions.x-innerclass}})
+          {{/items.isContainer}}
+          {{^items.isContainer}}
+            if isinstance(self.{{name}}, dict):
+                raise HuaweiCloudSDKException(
+                    message="The datatype of parameter({{name}}) "
+                            "is not dict")
+            for v in self.{{name}}.values():
+            {{#items.complexType}}
+                if not isinstance(v, {{items.complexType}}):
+                    raise HuaweiCloudSDKException(
+                        message="Not all items in parameter({{name}}) "
+                                "is type of {{items.complexType}}")
+            {{/items.complexType}}
+            {{^items.complexType}}
+              {{#items.isDate}}
+                if not isinstance(v, datetime.date):
+                    raise HuaweiCloudSDKException(
+                        message="Not all items in parameter({{name}}) "
+                                "is type of datetime.date")
+              {{/items.isDate}}
+              {{^items.isDate}}
+                {{#items.isDateTime}}
+                if not isinstance(v, datetime.datetime):
+                    raise HuaweiCloudSDKException(
+                        message="Not all items in parameter({{name}}) "
+                                "is type of datetime.datetime")
+                {{/items.isDateTime}}
+                {{^items.isDateTime}}
+                  {{#items.isLong}}
+                if not isinstance(v, int if six.PY3 else long):
+                    raise HuaweiCloudSDKException(
+                        message="Not all items in parameter({{name}}) "
+                                "is type of long")
+                  {{/items.isLong}}
+                  {{^items.isLong}}
+                if not isinstance(v, {{items.datatype}}):
+                    raise HuaweiCloudSDKException(
+                        message="Not all items in parameter({{name}}) "
+                                "is type of {{items.datatype}}")
+                  {{/items.isLong}}
+                {{/items.isDateTime}}
+              {{/items.isDate}}
+            {{/items.complexType}}
+          {{/items.isContainer}}
+        {{/isMapContainer}}
+      {{/isContainer}}
+      {{^isContainer}}
+        {{#complexType}}
+            if not isinstance(self.{{name}}, {{complexType}}):
+                raise HuaweiCloudSDKException(
+                    message="The datatype of parameter({{name}}) "
+                            "is not {{complexType}}")
+        {{/complexType}}
+        {{^complexType}}
+          {{#isDate}}
+            if not isinstance(self.{{name}}, datetime.date):
+                raise HuaweiCloudSDKException(
+                    message="The datatype of parameter({{name}}) "
+                            "is not datetime.date")
+          {{/isDate}}
+          {{^isDate}}
+            {{#isDateTime}}
+            if not isinstance(self.{{name}}, datetime.datetime):
+                raise HuaweiCloudSDKException(
+                    message="The datatype of parameter({{name}}) "
+                            "is not datetime.datetime")
+            {{/isDateTime}}
+            {{^isDateTime}}
+              {{#isLong}}
+            if not isinstance(self.{{name}}, int if six.PY3 else long):
+                raise HuaweiCloudSDKException(
+                    message="The datatype of parameter({{name}}) "
+                            "is not long")
+              {{/isLong}}
+              {{^isLong}}
+            if not isinstance(self.{{name}}, {{datatype}}):
+                raise HuaweiCloudSDKException(
+                    message="The datatype of parameter({{name}}) "
+                            "is not {{datatype}}")
+              {{/isLong}}
+            {{/isDateTime}}
+          {{/isDate}}
+        {{/complexType}}
+      {{/isContainer}}
+
+    {{/required}}
+  {{/vars}}
+        obj = {
+  {{#vars}}
+            "{{name}}": self.{{name}},
+  {{/vars}}
+        }
+        return util.serialize(
+            {k: v for k, v in obj.items() if v is not None})
+{{/isReq}}
+{{#isResp}}
+
+    def deserialize(self, data):
+        if not isinstance(data, dict):
+            return None
+
+  {{#vars}}
+    {{#isContainer}}
+      {{#isListContainer}}
+        {{#items.isContainer}}
+        self.{{name}} = util.deserialize(
+            data.get("{{name}}"), "{{datatype}}"{{#vendorExtensions.x-innerclass}}, {{vendorExtensions.x-innerclass}}{{/vendorExtensions.x-innerclass}})
+        {{/items.isContainer}}
+        {{^items.isContainer}}
+        if isinstance(data.get("{{name}}"), list):
+          {{#items.complexType}}
+            self.{{name}} = [
+                {{items.complexType}}().deserialize(v)
+                for v in data["{{name}}"]]
+          {{/items.complexType}}
+          {{^items.complexType}}
+            {{#items.isDate}}
+            self.{{name}} = [
+                util.deserialize_date(v)
+                for v in data["{{name}}"]]
+            {{/items.isDate}}
+            {{^items.isDate}}
+              {{#items.isDateTime}}
+            self.{{name}} = [
+                util.deserialize_datetime(v)
+                for v in data["{{name}}"]]
+              {{/items.isDateTime}}
+              {{^items.isDateTime}}
+                {{#items.isLong}}
+            self.{{name}} = [
+                util.deserialize_primitive(v, int if six.PY3 else long)
+                for v in data["{{name}}"]]
+                {{/items.isLong}}
+                {{^items.isLong}}
+            self.{{name}} = [
+                util.deserialize_primitive(v, {{items.datatype}})
+                for v in data["{{name}}"]]
+                {{/items.isLong}}
+              {{/items.isDateTime}}
+            {{/items.isDate}}
+          {{/items.complexType}}
+        {{/items.isContainer}}
+      {{/isListContainer}}
+      {{#isMapContainer}}
+        {{#items.isContainer}}
+        self.{{name}} = util.deserialize(
+            data.get("{{name}}"), "{{datatype}}"{{#vendorExtensions.x-innerclass}}, {{vendorExtensions.x-innerclass}}{{/vendorExtensions.x-innerclass}})
+        {{/items.isContainer}}
+        {{^items.isContainer}}
+        if isinstance(data.get("{{name}}"), dict):
+          {{#items.complexType}}
+            self.{{name}} = {
+                k: {{items.complexType}}().deserialize(v)
+                for k, v in data["{{name}}"].items()}
+          {{/items.complexType}}
+          {{^items.complexType}}
+            {{#items.isDate}}
+            self.{{name}} = {
+                k: util.deserialize_date(v)
+                for k, v in data["{{name}}"].items()}
+            {{/items.isDate}}
+            {{^items.isDate}}
+              {{#items.isDateTime}}
+            self.{{name}} = {
+                k: util.deserialize_datetime(v)
+                for k, v in data["{{name}}"].items()}
+              {{/items.isDateTime}}
+              {{^items.isDateTime}}
+                {{#items.isLong}}
+            self.{{name}} = {
+                k: util.deserialize_primitive(v, int if six.PY3 else long)
+                for k, v in data["{{name}}"].items()}
+                {{/items.isLong}}
+                {{^items.isLong}}
+            self.{{name}} = {
+                k: util.deserialize_primitive(v, {{items.datatype}})
+                for k, v in data["{{name}}"].items()}
+                {{/items.isLong}}
+              {{/items.isDateTime}}
+            {{/items.isDate}}
+          {{/items.complexType}}
+        {{/items.isContainer}}
+      {{/isMapContainer}}
+    {{/isContainer}}
+    {{^isContainer}}
+      {{#complexType}}
+        self.{{name}} = {{complexType}}().deserialize(
+            data.get("{{name}}"))
+      {{/complexType}}
+      {{^complexType}}
+        {{#isDate}}
+        self.{{name}} = util.deserialize_date(
+            data.get("{{name}}"))
+        {{/isDate}}
+        {{^isDate}}
+          {{#isDateTime}}
+        self.{{name}} = util.deserialize_datetime(
+            data.get("{{name}}"))
+          {{/isDateTime}}
+          {{^isDateTime}}
+            {{#isLong}}
+        self.{{name}} = util.deserialize_primitive(
+            data.get("{{name}}"), int if six.PY3 else long)
+            {{/isLong}}
+            {{^isLong}}
+        self.{{name}} = util.deserialize_primitive(
+            data.get("{{name}}"), {{datatype}})
+            {{/isLong}}
+          {{/isDateTime}}
+        {{/isDate}}
+      {{/complexType}}
+    {{/isContainer}}
+
+  {{/vars}}
+        return self
+{{/isResp}}
+{{/model}}
+{{/allmodels}}

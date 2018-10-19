@@ -1,0 +1,462 @@
+# coding: utf-8
+
+import json
+import six
+from six.moves.urllib.parse import quote
+
+from huaweicloud.common.exception import HuaweiCloudSDKException
+from huaweicloud.common import util
+from huaweicloud.{{serviceCategory}}.{{version}} import models
+
+
+class Api(object):
+    def __init__(self, api_client):
+        self.api_client = api_client
+{{#alloperations}}
+{{#operations}}
+{{#operation}}
+
+    def {{operationId}}(self, {{#allParams}}{{#required}}{{paramName}}, {{/required}}{{/allParams}}{{#allParams}}{{^required}}{{paramName}}=None, {{/required}}{{/allParams}}**kwargs):
+        """{{#summary}}{{.}}{{/summary}}{{^summary}}{{operationId}}{{/summary}}
+
+{{#allParams}}
+  {{#required}}
+        :param {{paramName}}:{{#description}} {{{description}}}{{/description}}
+        :type {{paramName}}: {{dataType}}
+  {{/required}}
+{{/allParams}}
+{{#allParams}}
+  {{^required}}
+        :param {{paramName}}:{{#description}} {{{description}}}{{/description}}
+        :type {{paramName}}: {{dataType}}
+  {{/required}}
+{{/allParams}}
+        :rtype: {{#returnType}}{{returnType}}{{/returnType}}{{^returnType}}None{{/returnType}}
+        """
+{{#hasPathParams}}
+
+        path_params = {}
+{{#pathParams}}
+  {{#isListContainer}}
+    {{#items.isContainer}}
+        util.check_datatype("{{paramName}}", {{paramName}}, "{{datatype}}")
+    {{/items.isContainer}}
+    {{^items.isContainer}}
+        if not isinstance({{paramName}}, list):
+            raise HuaweiCloudSDKException(
+                message="The datatype of parameter({{paramName}}) is not list")
+        for v in {{paramName}}:
+      {{#items.isLong}}
+            if not isinstance(v, int if six.PY3 else long):
+                raise HuaweiCloudSDKException(
+                    message="Not all items in parameter({{paramName}}) is "
+                            "type of long")
+      {{/items.isLong}}
+      {{^items.isLong}}
+            if not isinstance(v, {{items.datatype}}):
+                raise HuaweiCloudSDKException(
+                    message="Not all items in parameter({{paramName}}) is "
+                            "type of {{items.datatype}}")
+      {{/items.isLong}}
+    {{/items.isContainer}}
+    {{^isCollectionFormatMulti}}{{! multi will not be used in path param}}
+        path_params["{{baseName}}"] = quote(util.get_collect_format(
+            '{{collectionFormat}}').join(str(v) for v in {{paramName}}))
+    {{/isCollectionFormatMulti}}
+  {{/isListContainer}}
+  {{^isListContainer}}
+    {{#isLong}}
+        if not isinstance({{paramName}}, int if six.PY3 else long):
+            raise HuaweiCloudSDKException(
+                message="The datatype of parameter({{paramName}}) is not long")
+    {{/isLong}}
+    {{^isLong}}
+        if not isinstance({{paramName}}, {{dataType}}):
+            raise HuaweiCloudSDKException(
+                message="The datatype of parameter({{paramName}}) is not "
+                        "{{dataType}}")
+    {{/isLong}}
+        path_params["{{baseName}}"] = quote(str({{paramName}}))
+  {{/isListContainer}}
+
+{{/pathParams}}
+        url = '{{{path}}}'.format(**path_params)
+{{/hasPathParams}}
+{{#hasQueryParams}}
+
+        query_params = []
+{{#queryParams}}
+  {{#required}}
+    {{#isListContainer}}
+      {{#items.isContainer}}
+        util.check_datatype("{{paramName}}", {{paramName}}, "{{datatype}}")
+      {{/items.isContainer}}
+      {{^items.isContainer}}
+        if not isinstance({{paramName}}, list):
+            raise HuaweiCloudSDKException(
+                message="The datatype of parameter({{paramName}}) "
+                        "is not list")
+        for v in {{paramName}}:
+        {{#items.isLong}}
+            if not isinstance(v, int if six.PY3 else long):
+                raise HuaweiCloudSDKException(
+                    message="Not all items in parameter({{paramName}}) "
+                            "is type of long")
+        {{/items.isLong}}
+        {{^items.isLong}}
+            if not isinstance(v, {{items.datatype}}):
+                raise HuaweiCloudSDKException(
+                    message="Not all items in parameter({{paramName}}) "
+                            "is type of {{items.datatype}}")
+        {{/items.isLong}}
+      {{/items.isContainer}}
+      {{#isCollectionFormatMulti}}
+        for v in {{paramName}}:
+            query_params.append(("{{baseName}}", v))
+      {{/isCollectionFormatMulti}}
+      {{^isCollectionFormatMulti}}
+        query_params.append(
+            ("{{baseName}}",
+             util.get_collect_format('{{collectionFormat}}').join(
+                 str(v) for v in {{paramName}})))
+      {{/isCollectionFormatMulti}}
+    {{/isListContainer}}
+    {{^isListContainer}}
+      {{#isLong}}
+        if not isinstance({{paramName}}, int if six.PY3 else long):
+            raise HuaweiCloudSDKException(
+                message="The datatype of parameter({{paramName}}) "
+                        "is not long")
+      {{/isLong}}
+      {{^isLong}}
+        if not isinstance({{paramName}}, {{dataType}}):
+            raise HuaweiCloudSDKException(
+                message="The datatype of parameter({{paramName}}) "
+                        "is not {{dataType}}")
+      {{/isLong}}
+        query_params.append(("{{baseName}}", {{paramName}}))
+    {{/isListContainer}}
+  {{/required}}
+  {{^required}}
+        if {{paramName}} is not None:
+    {{#isListContainer}}
+      {{#items.isContainer}}
+            util.check_datatype("{{paramName}}", {{paramName}}, "{{datatype}}")
+      {{/items.isContainer}}
+      {{^items.isContainer}}
+            if not isinstance({{paramName}}, list):
+                raise HuaweiCloudSDKException(
+                    message="The datatype of parameter({{paramName}}) "
+                            "is not list")
+            for v in {{paramName}}:
+        {{#items.isLong}}
+                if not isinstance(v, int if six.PY3 else long):
+                    raise HuaweiCloudSDKException(
+                        message="Not all items in parameter({{paramName}}) "
+                                "is type of long")
+        {{/items.isLong}}
+        {{^items.isLong}}
+                if not isinstance(v, {{items.datatype}}):
+                    raise HuaweiCloudSDKException(
+                        message="Not all items in parameter({{paramName}}) "
+                                "is type of {{items.datatype}}")
+        {{/items.isLong}}
+      {{/items.isContainer}}
+      {{#isCollectionFormatMulti}}
+            for v in {{paramName}}:
+                query_params.append(("{{baseName}}", v))
+      {{/isCollectionFormatMulti}}
+      {{^isCollectionFormatMulti}}
+            query_params.append(
+                ("{{baseName}}",
+                 util.get_collect_format('{{collectionFormat}}').join(
+                     str(v) for v in {{paramName}})))
+      {{/isCollectionFormatMulti}}
+    {{/isListContainer}}
+    {{^isListContainer}}
+      {{#isLong}}
+            if not isinstance({{paramName}}, int if six.PY3 else long):
+                raise HuaweiCloudSDKException(
+                    message="The datatype of parameter({{paramName}}) "
+                            "is not long")
+      {{/isLong}}
+      {{^isLong}}
+            if not isinstance({{paramName}}, {{dataType}}):
+                raise HuaweiCloudSDKException(
+                    message="The datatype of parameter({{paramName}}) "
+                            "is not {{dataType}}")
+      {{/isLong}}
+            query_params.append(("{{baseName}}", {{paramName}}))
+    {{/isListContainer}}
+  {{/required}}
+  {{#hasMore}}
+
+  {{/hasMore}}
+{{/queryParams}}
+{{/hasQueryParams}}
+{{#hasFormParams}}
+
+        form_params = []
+        local_var_files = {}
+{{#formParams}}
+        if '{{paramName}}' in params:
+            {{#notFile}}form_params.append(('{{baseName}}', params['{{paramName}}'])){{/notFile}}{{#isFile}}local_var_files['{{baseName}}'] = params['{{paramName}}']{{/isFile}}{{#isListContainer}}  # noqa: E501
+            collection_formats['{{baseName}}'] = '{{collectionFormat}}'{{/isListContainer}}  # noqa: E501
+{{/formParams}}
+{{/hasFormParams}}
+{{#hasBodyParam}}
+{{#bodyParam}}
+
+  {{#bodyParam.vendorExtensions.x-reqbodyparammodel}}
+    {{#required}}
+        if not isinstance({{paramName}}, models.{{bodyParam.dataType}}):
+            raise HuaweiCloudSDKException(
+                message="The datatype of parameter({{paramName}}) "
+                        "is not {{bodyParam.dataType}}")
+        body_params = {{paramName}}.serialize()
+    {{/required}}
+    {{^required}}
+        body_params = None
+        if {{paramName}} is not None:
+            if not isinstance({{paramName}}, models.{{bodyParam.dataType}}):
+                raise HuaweiCloudSDKException(
+                    message="The datatype of parameter({{paramName}}) "
+                            "is not {{bodyParam.dataType}}")
+            body_params = {{paramName}}.serialize()
+    {{/required}}
+  {{/bodyParam.vendorExtensions.x-reqbodyparammodel}}
+  {{^bodyParam.vendorExtensions.x-reqbodyparammodel}}
+    {{#required}}
+        util.check_datatype("{{paramName}}", {{paramName}},
+                            "{{bodyParam.dataType}}"{{#bodyParam.vendorExtensions.x-reqbodyparaminnermodel}}, models.{{bodyParam.baseType}}{{/bodyParam.vendorExtensions.x-reqbodyparaminnermodel}})
+        body_params = util.serialize({{paramName}})
+    {{/required}}
+    {{^required}}
+        body_params = None
+        if {{paramName}} is not None:
+            util.check_datatype("{{paramName}}", {{paramName}},
+                                "{{bodyParam.dataType}}"{{#bodyParam.vendorExtensions.x-reqbodyparaminnermodel}}, models.{{bodyParam.baseType}}{{/bodyParam.vendorExtensions.x-reqbodyparaminnermodel}})
+            body_params = util.serialize({{paramName}})
+    {{/required}}
+  {{/bodyParam.vendorExtensions.x-reqbodyparammodel}}
+{{/bodyParam}}
+{{/hasBodyParam}}
+{{#hasHeaderParams}}
+
+        header_params = {}
+{{/hasHeaderParams}}
+{{^hasHeaderParams}}
+  {{#hasProduces}}
+
+        header_params = {}
+  {{/hasProduces}}
+  {{^hasProduces}}
+    {{#hasConsumes}}
+
+        header_params = {}
+    {{/hasConsumes}}
+  {{/hasProduces}}
+{{/hasHeaderParams}}
+{{#headerParams}}
+  {{#required}}
+    {{#isListContainer}}
+      {{#items.isContainer}}
+        util.check_datatype("{{paramName}}", {{paramName}}, "{{datatype}}")
+      {{/items.isContainer}}
+      {{^items.isContainer}}
+        if not isinstance({{paramName}}, list):
+            raise HuaweiCloudSDKException(
+                message="The datatype of parameter({{paramName}}) "
+                        "is not list")
+        for v in {{paramName}}:
+        {{#items.isLong}}
+            if not isinstance(v, int if six.PY3 else long):
+                raise HuaweiCloudSDKException(
+                    message="Not all items in parameter({{paramName}}) "
+                            "is type of long")
+        {{/items.isLong}}
+        {{^items.isLong}}
+            if not isinstance(v, {{items.datatype}}):
+                raise HuaweiCloudSDKException(
+                    message="Not all items in parameter({{paramName}}) "
+                            "is type of {{items.datatype}}")
+        {{/items.isLong}}
+      {{/items.isContainer}}
+      {{^isCollectionFormatMulti}}{{! multi will only be used in query param}}
+        header_params["{{baseName}}"] = util.get_collect_format('{{collectionFormat}}').join(
+            str(v) for v in {{paramName}})
+      {{/isCollectionFormatMulti}}
+    {{/isListContainer}}
+    {{^isListContainer}}
+      {{#isLong}}
+        if not isinstance({{paramName}}, int if six.PY3 else long):
+            raise HuaweiCloudSDKException(
+                message="The datatype of parameter({{paramName}}) "
+                        "is not long")
+      {{/isLong}}
+      {{^isLong}}
+        if not isinstance({{paramName}}, {{dataType}}):
+            raise HuaweiCloudSDKException(
+                message="The datatype of parameter({{paramName}}) "
+                        "is not {{dataType}}")
+      {{/isLong}}
+        header_params["{{baseName}}"] = {{paramName}}
+    {{/isListContainer}}
+  {{/required}}
+  {{^required}}
+        if {{paramName}} is not None:
+    {{#isListContainer}}
+      {{#items.isContainer}}
+            util.check_datatype("{{paramName}}", {{paramName}}, "{{datatype}}")
+      {{/items.isContainer}}
+      {{^items.isContainer}}
+            if not isinstance({{paramName}}, list):
+                raise HuaweiCloudSDKException(
+                    message="The datatype of parameter({{paramName}}) "
+                            "is not list")
+            for v in {{paramName}}:
+        {{#items.isLong}}
+                if not isinstance(v, int if six.PY3 else long):
+                    raise HuaweiCloudSDKException(
+                        message="Not all items in parameter({{paramName}}) "
+                                "is type of long")
+        {{/items.isLong}}
+        {{^items.isLong}}
+                if not isinstance(v, {{items.datatype}}):
+                    raise HuaweiCloudSDKException(
+                        message="Not all items in parameter({{paramName}}) "
+                                "is type of {{items.datatype}}")
+        {{/items.isLong}}
+      {{/items.isContainer}}
+      {{^isCollectionFormatMulti}}{{! multi will only be used in query {{paramName}}}}
+            header_params["{{baseName}}"] = util.get_collect_format('{{collectionFormat}}').join(
+                str(v) for v in {{paramName}})
+      {{/isCollectionFormatMulti}}
+    {{/isListContainer}}
+    {{^isListContainer}}
+      {{#isLong}}
+            if not isinstance({{paramName}}, int if six.PY3 else long):
+                raise HuaweiCloudSDKException(
+                    message="The datatype of parameter({{paramName}}) "
+                            "is not long")
+      {{/isLong}}
+      {{^isLong}}
+            if not isinstance({{paramName}}, {{dataType}}):
+                raise HuaweiCloudSDKException(
+                    message="The datatype of parameter({{paramName}}) "
+                            "is not {{dataType}}")
+      {{/isLong}}
+            header_params["{{baseName}}"] = {{paramName}}
+    {{/isListContainer}}
+  {{/required}}
+  {{#hasMore}}
+
+  {{/hasMore}}
+{{/headerParams}}
+{{#hasProduces}}
+  {{#hasHeaderParams}}
+
+  {{/hasHeaderParams}}
+        header_params['Accept'] = util.select_header_accept(
+            [{{#produces}}'{{{mediaType}}}'{{#hasMore}}, {{/hasMore}}{{/produces}}])
+{{/hasProduces}}
+{{#hasConsumes}}
+  {{#hasHeaderParams}}
+
+  {{/hasHeaderParams}}
+  {{^hasHeaderParams}}
+    {{#hasProduces}}
+
+    {{/hasProduces}}
+  {{/hasHeaderParams}}
+        header_params['Content-Type'] = util.select_header_content_type(
+            [{{#consumes}}'{{{mediaType}}}'{{#hasMore}}, {{/hasMore}}{{/consumes}}])
+{{/hasConsumes}}
+
+{{#vendorExtensions.x-respsuccesscodes}}
+        return_code, return_data, _ = self.api_client.handle_raw_request(
+{{/vendorExtensions.x-respsuccesscodes}}
+{{^vendorExtensions.x-respsuccesscodes}}
+  {{#returnType}}
+        _, return_data, _ = self.api_client.handle_raw_request(
+  {{/returnType}}
+  {{^returnType}}
+        self.api_client.handle_raw_request(
+  {{/returnType}}
+{{/vendorExtensions.x-respsuccesscodes}}
+            '{{serviceType}}', '{{httpMethod}}',{{#hasPathParams}} url,{{/hasPathParams}}
+{{^hasPathParams}}
+            '{{{path}}}',
+{{/hasPathParams}}
+{{#hasHeaderParams}}
+            headers=header_params,
+{{/hasHeaderParams}}
+{{^hasHeaderParams}}
+  {{#hasProduces}}
+            headers=header_params,
+  {{/hasProduces}}
+  {{^hasProduces}}
+    {{#hasConsumes}}
+            headers=header_params,
+    {{/hasConsumes}}
+  {{/hasProduces}}
+{{/hasHeaderParams}}
+{{#hasQueryParams}}
+            query_params=query_params,
+{{/hasQueryParams}}
+{{#hasBodyParam}}
+            body=body_params,
+{{/hasBodyParam}}
+            timeout=kwargs.get('_request_timeout', None),
+            _preload_content=kwargs.get('_preload_content', True))
+{{#vendorExtensions.x-respsuccesscodes}}
+
+  {{#returnType}}
+        if return_data is not None:
+            return_data = json.loads(return_data)
+        else:
+            return_data = {}
+        if return_code not in [{{vendorExtensions.x-respsuccesscodes}}]:
+            raise HuaweiCloudSDKException(
+                return_code,
+                "Run {{operationId}} failed, "
+                "message=%s" % return_data.get("message"))
+    {{#vendorExtensions.x-respbodyparammodel}}
+        return models.{{returnType}}().deserialize(return_data)
+    {{/vendorExtensions.x-respbodyparammodel}}
+    {{^vendorExtensions.x-respbodyparammodel}}
+        return util.deserialize(
+            return_data, "{{returnType}}"{{#vendorExtensions.x-respbodyparaminnermodel}}, models.{{returnBaseType}}{{/vendorExtensions.x-respbodyparaminnermodel}})
+    {{/vendorExtensions.x-respbodyparammodel}}
+  {{/returnType}}
+  {{^returnType}}
+        if return_code not in [{{vendorExtensions.x-respsuccesscodes}}]:
+            if return_data is not None:
+                return_data = json.loads(return_data)
+            else:
+                return_data = {}
+            raise HuaweiCloudSDKException(
+                return_code,
+                "Run {{operationId}} failed, "
+                "message=%s" % return_data.get("message"))
+  {{/returnType}}
+{{/vendorExtensions.x-respsuccesscodes}}
+{{^vendorExtensions.x-respsuccesscodes}}
+  {{#returnType}}
+
+        if return_data is not None:
+            return_data = json.loads(return_data)
+        else:
+            return_data = {}
+    {{#vendorExtensions.x-respbodyparammodel}}
+        return models.{{returnType}}().deserialize(return_data)
+    {{/vendorExtensions.x-respbodyparammodel}}
+    {{^vendorExtensions.x-respbodyparammodel}}
+        return util.deserialize(
+            return_data, "{{returnType}}"{{#vendorExtensions.x-respbodyparaminnermodel}}, models.{{returnBaseType}}{{/vendorExtensions.x-respbodyparaminnermodel}})
+    {{/vendorExtensions.x-respbodyparammodel}}
+  {{/returnType}}
+{{/vendorExtensions.x-respsuccesscodes}}
+{{/operation}}
+{{/operations}}
+{{/alloperations}}
