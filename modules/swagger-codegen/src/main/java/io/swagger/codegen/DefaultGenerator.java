@@ -757,8 +757,9 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
         generateApis(files, allOperations, allModels);
 
         mergeModelApiInfo(allModels, allOperations);
-        files.add(writeModelFile(allModels, swagger.getHost(), swagger.getInfo().getVersion()));
-        files.add(writeApiFile(allOperations, swagger.getHost(), swagger.getBasePath(), swagger.getInfo().getVersion()));
+        String serviceType = swagger.getInfo().getTitle().toLowerCase();
+        files.add(writeModelFile(allModels, serviceType, swagger.getInfo().getVersion()));
+        files.add(writeApiFile(allOperations, serviceType, serviceType, swagger.getInfo().getVersion()));
 
         // supporting files
         Map<String, Object> bundle = buildSupportFileBundle(allOperations, allModels);
@@ -889,7 +890,7 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
     }
 
 
-    private File writeModelFile(List<Object> allModels, String serviceCategory, String version) {
+    private File writeModelFile(List<Object> allModels, String serviceType, String version) {
         if (System.getProperty("debugModels") != null) {
             LOGGER.info("############ New Model info ############");
             Json.prettyPrint(allModels);
@@ -902,7 +903,7 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
             }
             for (String templateName : config.modelTemplateFiles().keySet()) {
                 String suffix = config.modelTemplateFiles().get(templateName);
-                String filename = config.apiFileFolder() + File.separator + serviceCategory + File.separator + version + File.separator + "models" + suffix;
+                String filename = config.apiFileFolder() + File.separator + serviceType + File.separator + version + File.separator + "models" + suffix;
                 if (!config.shouldOverwrite(filename)) {
                     LOGGER.info("Skipped overwriting " + filename);
                 } else {
@@ -934,7 +935,7 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
             }
             for (String templateName : config.apiTemplateFiles().keySet()) {
                 String suffix = config.apiTemplateFiles().get(templateName);
-                String filename = config.apiFileFolder() + File.separator + serviceCategory + File.separator + version + File.separator + "api" + suffix;
+                String filename = config.apiFileFolder() + File.separator + serviceType + File.separator + version + File.separator + "api" + suffix;
                 if (!config.shouldOverwrite(filename) && new File(filename).exists()) {
                     LOGGER.info("Skipped overwriting " + filename);
                     continue;

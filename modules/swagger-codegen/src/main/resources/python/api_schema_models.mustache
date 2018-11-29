@@ -1,0 +1,12 @@
+{{#allmodels}}
+{{#model}}
+{{classname}}:
+{{#vars}}
+   - name: {{name}}
+     datatype: {{{datatype}}}
+     mandatory: {{required}}
+     description: {{#description}}{{{description}}}{{/description}}
+{{/vars}}
+
+{{/model}}
+{{/allmodels}}

@@ -50,8 +50,8 @@ public class PythonClientCodegen extends DefaultCodegen implements CodegenConfig
         apiPackage = "api";
         outputFolder = "generated-code" + File.separatorChar + "python";
 
-        modelTemplateFiles.put("models.mustache", ".py");
-        apiTemplateFiles.put("apis.mustache", ".py");
+        modelTemplateFiles.put("api_schema_models.mustache", ".yaml");
+        apiTemplateFiles.put("api_schema.mustache", ".yaml");
 
         modelTestTemplateFiles.put("model_test.mustache", ".py");
         apiTestTemplateFiles.put("api_test.mustache", ".py");

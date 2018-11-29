@@ -1,0 +1,56 @@
+{{#alloperations}}
+{{#operations}}
+{{#operation}}
+{{operationId}}:
+  tag: "{{baseName}}"
+  service_type: "{{serviceType}}"
+  method: "{{httpMethod}}"
+  path : "{{path}}"
+{{#hasPathParams}}
+  path_params:
+{{#pathParams}}
+    - name: "{{paramName}}"
+      datatype: "{{datatype}}"
+      mandatory: {{required}}        
+      description: "{{description}}"
+  {{#isListContainer}}
+    {{^isCollectionFormatMulti}}{{! multi will not be used in path param}}
+      collection_format: "{{collectionFormat}}"
+    {{/isCollectionFormatMulti}}
+  {{/isListContainer}}
+{{/pathParams}}
+{{/hasPathParams}}
+{{#hasQueryParams}}
+  query_params:
+{{#queryParams}}
+    - name: "{{paramName}}"
+      datatype: "{{datatype}}"
+      mandatory: {{required}}        
+      description: "{{description}}"
+  {{#isListContainer}}
+      collection_format: "{{collectionFormat}}"
+  {{/isListContainer}}
+{{/queryParams}}
+{{/hasQueryParams}}
+{{#hasBodyParam}}
+  request_body:
+{{#bodyParam}}
+    name: "{{paramName}}"
+    datatype: "{{bodyParam.dataType}}"
+    description: "{{description}}"
+  {{^bodyParam.vendorExtensions.x-reqbodyparammodel}}
+    {{#bodyParam.vendorExtensions.x-reqbodyparaminnermodel}}
+    inner_datatype: {{bodyParam.baseType}}
+    {{/bodyParam.vendorExtensions.x-reqbodyparaminnermodel}}
+  {{/bodyParam.vendorExtensions.x-reqbodyparammodel}}
+{{/bodyParam}}
+{{/hasBodyParam}}
+  response:
+    datatype: {{returnType}}
+{{#vendorExtensions.x-respbodyparaminnermodel}}
+    inner_datatype: {{returnBaseType}}
+{{/vendorExtensions.x-respbodyparaminnermodel}}
+
+{{/operation}}
+{{/operations}}
+{{/alloperations}}
