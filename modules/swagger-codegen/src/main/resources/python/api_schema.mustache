@@ -12,7 +12,10 @@
     - name: "{{paramName}}"
       datatype: "{{datatype}}"
       mandatory: {{required}}        
-      description: "{{description}}"
+  {{#description}}
+      description: |
+        {{{description}}}
+  {{/description}}
   {{#isListContainer}}
     {{^isCollectionFormatMulti}}{{! multi will not be used in path param}}
       collection_format: "{{collectionFormat}}"
@@ -26,7 +29,10 @@
     - name: "{{paramName}}"
       datatype: "{{datatype}}"
       mandatory: {{required}}        
-      description: "{{description}}"
+  {{#description}}
+      description: |
+        {{{description}}}
+  {{/description}}
   {{#isListContainer}}
       collection_format: "{{collectionFormat}}"
   {{/isListContainer}}
@@ -37,7 +43,10 @@
 {{#bodyParam}}
     name: "{{paramName}}"
     datatype: "{{bodyParam.dataType}}"
-    description: "{{description}}"
+  {{#description}}
+    description: |
+      {{{description}}}
+  {{/description}}
   {{^bodyParam.vendorExtensions.x-reqbodyparammodel}}
     {{#bodyParam.vendorExtensions.x-reqbodyparaminnermodel}}
     inner_datatype: {{bodyParam.baseType}}

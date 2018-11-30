@@ -5,7 +5,10 @@
    - name: {{name}}
      datatype: {{{datatype}}}
      mandatory: {{required}}
-     description: {{#description}}{{{description}}}{{/description}}
+     {{#description}}
+     description: |
+       {{{description}}}
+     {{/description}}
 {{/vars}}
 
 {{/model}}
