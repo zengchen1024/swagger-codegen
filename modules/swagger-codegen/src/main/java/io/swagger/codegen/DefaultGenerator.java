@@ -760,6 +760,7 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
         String serviceType = swagger.getInfo().getTitle().toLowerCase();
         files.add(writeModelFile(allModels, serviceType, swagger.getInfo().getVersion()));
         files.add(writeApiFile(allOperations, serviceType, serviceType, swagger.getInfo().getVersion()));
+        files.add(writeTagFile(swagger.getTags(), serviceType, serviceType, swagger.getInfo().getVersion()));
 
         // supporting files
         Map<String, Object> bundle = buildSupportFileBundle(allOperations, allModels);
@@ -952,6 +953,34 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
             }
         } catch (Exception e) {
             throw new RuntimeException("Could not generate api file", e);
+        }
+        return null;
+    }
+
+
+    private File writeTagFile(Object tags, String serviceCategory, String serviceType, String version) {
+        if (System.getProperty("debugOperations") != null) {
+            LOGGER.info("############ Tag info ############");
+            Json.prettyPrint(tags);
+        }
+
+        try {
+            version = version.replaceAll("[.]", "_");
+            if (!version.startsWith("v")) {
+                version = "v" + version;
+            }
+            String filename = config.apiFileFolder() + File.separator + serviceType + File.separator + version + File.separator + "tag.yaml";
+            Map<String, Object> templateParam = new HashMap<String, Object>();
+            templateParam.put("tags", tags);
+            templateParam.put("serviceCategory", serviceCategory);
+            templateParam.put("serviceType", serviceType);
+            templateParam.put("version", version);
+            File written = processTemplateToFile(templateParam, "tag.mustache", filename);
+            if (written != null) {
+                return written;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Could not generate tag file", e);
         }
         return null;
     }

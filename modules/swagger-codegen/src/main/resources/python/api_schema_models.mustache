@@ -3,12 +3,26 @@
 {{classname}}:
 {{#vars}}
    - name: {{name}}
+     {{#isEnum}}
+     datatype: enum
+     element_type: {{{datatype}}}
+     allowed_values:
+       {{#allowableValues.enumVars}}
+       - {{{value}}}
+       {{/allowableValues.enumVars}}
+     {{/isEnum}}
+     {{^isEnum}}
      datatype: {{{datatype}}}
+     {{/isEnum}}
      mandatory: {{required}}
      {{#description}}
      description: |
        {{{description}}}
      {{/description}}
+     {{#isListContainer}}
+     is_array: true
+     items_datatype: {{items.datatype}}
+     {{/isListContainer}}
 {{/vars}}
 
 {{/model}}
