@@ -760,7 +760,7 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
         String serviceType = swagger.getInfo().getTitle().toLowerCase();
         files.add(writeModelFile(allModels, serviceType, swagger.getInfo().getVersion()));
         files.add(writeApiFile(allOperations, serviceType, serviceType, swagger.getInfo().getVersion()));
-        files.add(writeTagFile(swagger.getTags(), serviceType, serviceType, swagger.getInfo().getVersion()));
+        files.add(writeProductFile(swagger.getTags(), serviceType, serviceType, swagger.getInfo().getVersion()));
 
         // supporting files
         Map<String, Object> bundle = buildSupportFileBundle(allOperations, allModels);
@@ -958,9 +958,9 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
     }
 
 
-    private File writeTagFile(Object tags, String serviceCategory, String serviceType, String version) {
+    private File writeProductFile(Object tags, String serviceCategory, String serviceType, String version) {
         if (System.getProperty("debugOperations") != null) {
-            LOGGER.info("############ Tag info ############");
+            LOGGER.info("############ Product info ############");
             Json.prettyPrint(tags);
         }
 
@@ -969,13 +969,13 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
             if (!version.startsWith("v")) {
                 version = "v" + version;
             }
-            String filename = config.apiFileFolder() + File.separator + serviceType + File.separator + version + File.separator + "tag.yaml";
+            String filename = config.apiFileFolder() + File.separator + serviceType + File.separator + version + File.separator + "product.yaml";
             Map<String, Object> templateParam = new HashMap<String, Object>();
             templateParam.put("tags", tags);
             templateParam.put("serviceCategory", serviceCategory);
             templateParam.put("serviceType", serviceType);
             templateParam.put("version", version);
-            File written = processTemplateToFile(templateParam, "tag.mustache", filename);
+            File written = processTemplateToFile(templateParam, "product.mustache", filename);
             if (written != null) {
                 return written;
             }
