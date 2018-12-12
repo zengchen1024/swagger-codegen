@@ -2,7 +2,10 @@
 {{#operations}}
 {{#operation}}
 {{operationId}}:
-  tag: "{{baseName}}"
+  tag:
+  {{#tags}}
+    - {{name}}
+  {{/tags}}
   service_type: "{{serviceType}}"
   method: "{{httpMethod}}"
   path : "{{path}}"
