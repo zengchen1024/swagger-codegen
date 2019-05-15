@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;
+import java.util.regex.Pattern;
 
 public class DefaultGenerator extends AbstractGenerator implements Generator {
     protected final Logger LOGGER = LoggerFactory.getLogger(DefaultGenerator.class);
@@ -757,6 +758,7 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
         generateApis(files, allOperations, allModels);
 
         mergeModelApiInfo(allModels, allOperations);
+        setApiVersion(allOperations);
         String serviceType = swagger.getInfo().getTitle().toLowerCase();
         files.add(writeModelFile(allModels, serviceType, swagger.getInfo().getVersion()));
         files.add(writeApiFile(allOperations, serviceType, serviceType, swagger.getInfo().getVersion()));
@@ -890,6 +892,50 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
         }
     }
 
+    private void setApiVersion(List<Object> allOperations) {
+        for (Object allItems : allOperations) {
+            Map<String, Object> items = (Map<String, Object>)allItems;
+            if (!items.containsKey("operations")) {
+                continue;
+            }
+
+            Map<String, Object> operations = (Map<String, Object>)items.get("operations");
+            if (!operations.containsKey("operation")) {
+                continue;
+            }
+
+            List<CodegenOperation> operation = (List<CodegenOperation>)operations.get("operation");
+            for (CodegenOperation op : operation) {
+               if (op.vendorExtensions == null) {
+                   op.vendorExtensions = new HashMap<String, Object>();
+               }
+               op.vendorExtensions.put("x-version", getApiVersion(op));
+	    }
+	}
+    }
+
+    private String getApiVersion(CodegenOperation op) {
+        if (op.vendorExtensions.containsKey("x-version")) {
+            String version = op.vendorExtensions.get("x-version").toString();
+            if (isCorrectApiVersion(version)) {
+                return version;
+            }
+        }
+
+        String path = op.path.toString().toLowerCase();
+        for (String p : path.split("/")) {
+            if (isCorrectApiVersion(p)) {
+                return p;
+            }
+        }
+
+        return "";
+    }
+
+    private boolean isCorrectApiVersion(String version) {
+       String pattern = "v?[0-9]+\\.?[0-9]*";
+       return Pattern.matches(pattern, version.toLowerCase());
+    }
 
     private File writeModelFile(List<Object> allModels, String serviceType, String version) {
         if (System.getProperty("debugModels") != null) {
